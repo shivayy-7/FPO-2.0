@@ -1,0 +1,20 @@
+package com.fpo.web.repositories;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fpo.web.entities.Training;
+
+public interface TrainingRepository extends JpaRepository<Training, Long> {
+
+	List<Training> findAllByIsActive(boolean b);
+
+	Optional<Training> findByTrainingCode(String searchCode);
+
+	List<Training> findByStatus(String tabCode);
+
+//	Optional<Training> findByTrainingCodeAndStatus(String searchCode, String tabCode);
+
+}

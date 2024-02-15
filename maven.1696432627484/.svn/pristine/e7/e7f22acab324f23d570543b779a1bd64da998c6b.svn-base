@@ -1,0 +1,9 @@
+package com.fpo.web.repositories;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fpo.web.entities.Farmer;
+
+public interface FarmerRepository extends JpaRepository<Farmer, Long> {
+
+}

@@ -1,0 +1,27 @@
+package com.fpo.web.vos;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import com.fpo.web.entities.FarmerCbboMngmt;
+
+import lombok.Data;
+
+@Data
+public class TrainingVO {
+
+	private Long trainingId;
+    private String trainingCode;
+    private FarmerCbboMngmt trainer;
+    private List<Long> fpoId;
+    private String eventDesc;
+    private String dateOfEvent;
+    private String subject;
+    private String status;
+	
+}

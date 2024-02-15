@@ -1,0 +1,143 @@
+package com.fpo.web.services;
+
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Random;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.fpo.web.entities.Caste;
+import com.fpo.web.entities.Farmer;
+import com.fpo.web.entities.Member;
+import com.fpo.web.repositories.CasteRepository;
+import com.fpo.web.repositories.FarmerRepository;
+import com.fpo.web.repositories.GenderRepository;
+import com.fpo.web.repositories.MemberRepository;
+import com.fpo.web.utils.ApplicationConstants;
+import com.fpo.web.vos.FarmerDtls;
+import com.fpo.web.vos.MemberVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class MemberServiceImpl implements MemberService {
+	
+	@Autowired private MemberRepository memberRepository;
+	
+	@Autowired private GenderRepository genderRepository;
+	
+	@Autowired private CasteRepository casteRepository;
+	
+	@Autowired private FarmerRepository farmerRepository;
+	
+	
+	@Override
+	public ServiceOutcome<FarmerDtls> manageMember(FarmerDtls farmerDtls) {
+		ServiceOutcome<FarmerDtls> soc = new ServiceOutcome<FarmerDtls>();
+		SimpleDateFormat adjustedFormat = new SimpleDateFormat("dd/MM/yyyy");
+		Random rand = new Random();
+		try {
+			String status = farmerDtls.getMember().getStatus();
+			if(status.equalsIgnoreCase(ApplicationConstants.UPDATE)) {
+				// for existing member
+				Optional<Member> existingMember = memberRepository.findById(farmerDtls.getMember().getMemberId());
+				if(existingMember.isPresent()) {
+					String memberCode = existingMember.get().getMemberCode();
+					BeanUtils.copyProperties(farmerDtls.getMember(), existingMember.get());
+					existingMember.get().setMemberCode(memberCode);
+					existingMember.get().setCaste(Optional.ofNullable(farmerDtls.getMember().getCaste().getCasteId()).isPresent() ? casteRepository.findById(farmerDtls.getMember().getCaste().getCasteId()).get() : null);
+					existingMember.get().setGender(Optional.ofNullable(farmerDtls.getMember().getGender().getGenderId()).isPresent() ? genderRepository.findByGenderId(farmerDtls.getMember().getGender().getGenderId()) : null);
+					try {
+						existingMember.get().setDateOfReg(adjustedFormat.parse(farmerDtls.getDateOfReg().trim()));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					existingMember.get().setIsActive(true);
+					Member saveMember = memberRepository.save(existingMember.get()); 
+					if(Optional.ofNullable(existingMember.get().getFarmer()).isPresent()) {
+						Optional<Farmer> farmerMember = farmerRepository.findById(existingMember.get().getFarmer().getFarmerId());
+						if(farmerMember.isPresent()) {
+							farmerMember.get().setName(saveMember.getName());
+							farmerMember.get().setAadharNo(saveMember.getAadharNo());
+							farmerMember.get().setGender(saveMember.getGender());
+							farmerMember.get().setCaste(saveMember.getCaste());
+							farmerRepository.save(farmerMember.get());
+							
+						}
+					}
+				}
+				
+			}else {
+				//for new Member
+				farmerDtls.getMemberVO().forEach(member->{
+					System.out.println(member);
+					Member newMember = new Member();
+						BeanUtils.copyProperties(member, newMember);
+						String memberCode = "MEMBER_" + rand.ints(48, 100)
+					        .filter(num -> (num < 58 || num > 64) && (num < 91 || num > 96))
+					        .limit(6)
+					        .mapToObj(c -> (char) c)
+					        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+					        .toString();
+						newMember.setMemberCode(memberCode);
+					newMember.setCaste(Optional.ofNullable(member.getCaste().getCasteId()).isPresent() ? casteRepository.findById(member.getCaste().getCasteId()).get() : null);
+					newMember.setGender(Optional.ofNullable(member.getGender().getGenderId()).isPresent() ? genderRepository.findByGenderId(member.getGender().getGenderId()) : null);
+					try {
+						newMember.setDateOfReg(adjustedFormat.parse(farmerDtls.getDateOfReg().trim()));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					newMember.setIsActive(true);
+					memberRepository.save(newMember); 
+				});
+			}
+			
+			soc.setMessage(status.equalsIgnoreCase(ApplicationConstants.UPDATE) ? "Member Updated" : "Member Added");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			log.error("Exception occurred in manageMember()-> MemberServiceImpl "+ e);
+			soc.setMessage("Unable to process");
+			soc.setOutcome(false);
+		}
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<FarmerDtls> getByMemberCode(String memberCode) {
+		ServiceOutcome<FarmerDtls> soc = new ServiceOutcome<FarmerDtls>();
+		FarmerDtls farmerDtls = new FarmerDtls();
+		MemberVO memberVo = new MemberVO();
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		try {
+			Optional<Member> findByMemberCode = memberRepository.findByMemberCode(memberCode);
+			if(Optional.ofNullable(findByMemberCode).isPresent()) {
+				
+				BeanUtils.copyProperties(findByMemberCode.get(), memberVo);
+				System.out.println("FARMER "+memberVo);
+				Date dateOfReg = dateTimeFormat.parse(findByMemberCode.get().getDateOfReg().toString());
+				memberVo.setDateOfReg(dateFormat.format(dateOfReg));
+//				memberVo.setFarmer(Optional.ofNullable(findByMemberCode.get().getFarmer()).isPresent() ? )
+				farmerDtls.setMember(memberVo);
+				soc.setData(farmerDtls);
+				soc.setMessage("success");
+				soc.setOutcome(true);
+			}
+		} catch (Exception e) {
+			log.error("Exception occurred in getByMemberCode()-> MemberServiceImpl "+ e);
+			soc.setMessage("Unable to process");
+			soc.setOutcome(false);
+		}
+		return soc;
+	}
+
+	
+	
+}

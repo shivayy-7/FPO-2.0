@@ -1,0 +1,82 @@
+package com.fpo.web.services;
+
+import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.fpo.web.entities.Farmer;
+import com.fpo.web.entities.FarmerSubActMap;
+import com.fpo.web.repositories.CasteRepository;
+import com.fpo.web.repositories.FarmerRepository;
+import com.fpo.web.repositories.FarmerSubActMapRepository;
+import com.fpo.web.repositories.GenderRepository;
+import com.fpo.web.vos.FarmerDtls;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class FarmerServiceImpl implements FarmerService {
+	
+	@Autowired private FarmerRepository farmerRepository;
+	
+	@Autowired private FarmerSubActMapRepository farmerSubActMapRepository;
+	
+	@Autowired private GenderRepository genderRepository;
+	
+	@Autowired private CasteRepository casteRepository;
+	
+	@Override
+	public ServiceOutcome<FarmerDtls> manageFarmer(FarmerDtls farmerDtls) {
+		ServiceOutcome<FarmerDtls> soc = new ServiceOutcome<FarmerDtls>();
+		try {
+			
+			switch (farmerDtls.getTab()) {
+            case "BASIC":
+            	Farmer existingFarmer = Optional.ofNullable(farmerDtls.getFarmerVO().getFarmerId())
+						                        .flatMap(farmerRepository::findById)
+						                        .map(farmer->{
+						                        	BeanUtils.copyProperties(farmerDtls.getFarmerVO(), farmer);
+						                        	farmer.setGender(Optional.ofNullable(farmerDtls.getFarmerVO().getGender().getGenderId()).isPresent() ? genderRepository.findById(farmerDtls.getFarmerVO().getGender().getGenderId()).get() : null);
+						                        	farmer.setCaste(Optional.ofNullable(farmerDtls.getFarmerVO().getCaste().getCasteId()).isPresent() ? casteRepository.findById(farmerDtls.getFarmerVO().getCaste().getCasteId()).get() : null);
+						                        	farmer.setActive(true);
+						                        	farmer.setStatus(farmerDtls.getFarmerVO().getStatus());
+						                        	return farmerRepository.save(farmer);
+						                        })
+						                        .orElseGet(()->{
+						                        	Farmer newFarmer = new Farmer();
+						                        	BeanUtils.copyProperties(farmerDtls.getFarmerVO(), newFarmer);
+						                        	newFarmer.setGender(Optional.ofNullable(farmerDtls.getFarmerVO().getGender().getGenderId()).isPresent() ? genderRepository.findByGenderId(farmerDtls.getFarmerVO().getGender().getGenderId()) : null);
+						                        	newFarmer.setCaste(Optional.ofNullable(farmerDtls.getFarmerVO().getCaste().getCasteId()).isPresent() ? casteRepository.findById(farmerDtls.getFarmerVO().getCaste().getCasteId()).get() : null);
+						                        	newFarmer.setActive(true);
+						                        	newFarmer.setStatus(farmerDtls.getFarmerVO().getStatus());
+						                        	return farmerRepository.save(newFarmer);
+						                        });
+            	Farmer saveFarmer = farmerRepository.save(existingFarmer);
+                break;
+            case "OCCUPATION":
+                
+                break;
+            case "ADDRESS":
+                System.out.println("It's Wednesday!");
+                break;
+            case "BANK":
+                System.out.println("It's Thursday!");
+                break;
+            case "DOCUMENT":
+                System.out.println("It's Friday!");
+                break;
+            default:
+                System.out.println("Invalid day of the week");
+			}	
+			
+		} catch (Exception e) {
+			log.error("Exception occurred in manageFarmer()-> FarmerServiceImpl "+ e);	
+		}
+		return soc;
+	}
+
+}

@@ -1,0 +1,14 @@
+package com.fpo.web.vos;
+
+import lombok.Data;
+
+@Data
+public class FarmerDtls {
+
+	private FarmerVO farmerVO;
+	
+	private FarmerSubActMapVO farmerSubActMapVO;
+	
+	private String tab;
+	
+}

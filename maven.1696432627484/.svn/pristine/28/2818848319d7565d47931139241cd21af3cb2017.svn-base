@@ -1,0 +1,65 @@
+package com.fpo.web.controllers;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.aashdit.umt.model.User;
+import com.aashdit.umt.util.SecurityHelper;
+import com.fpo.web.services.CommonService;
+import com.fpo.web.services.FarmerService;
+import com.fpo.web.utils.ApplicationConstants;
+import com.fpo.web.utils.UserAdminstrativeUtil;
+import com.fpo.web.vos.FarmerDtls;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@RequestMapping("/farmer")
+@Slf4j
+public class FarmerController {
+	
+	@Autowired private FarmerService farmerService;
+	
+	@Autowired private CommonService commonService;
+	
+	@Autowired private UserAdminstrativeUtil userAdminstrative;
+
+	@GetMapping
+	public String farmerPage(Model model) {
+		User user = SecurityHelper.getCurrentUser();
+		try {
+//			Long adminstrativeId = userAdminstrative.getAdminstrativeId(user);
+//			ServiceOutcome<List<?>> blockNameList = commonService.getAdminstartiveNameByAdminstrativeId(null, adminstrativeId, "VILLAGE");
+			model.addAttribute("genderList", commonService.getAllData(ApplicationConstants.GENDER).getData());
+			model.addAttribute("casteList", commonService.getAllData(ApplicationConstants.CASTE ).getData());
+//			model.addAttribute("blockList", blockNameList.getData());
+			model.addAttribute("distList", commonService.getAllData(ApplicationConstants.DISTRICT).getData());
+			model.addAttribute("componentList", commonService.getAllData(ApplicationConstants.COMPONENT).getData());
+		} catch (Exception e) {
+		   log.error("Exception occurred in farmerPage()-> FarmerController "+ e);	
+		}
+		return "site.addFarmer";
+	}
+	
+	@PostMapping("/manage-farmer")
+	public String addNUpdateFarmer(FarmerDtls farmerDtls, RedirectAttributes attr) {
+		User user = SecurityHelper.getCurrentUser();
+		try {
+			System.out.println(farmerDtls);
+			farmerService.manageFarmer(farmerDtls);
+		} catch (Exception e) {
+		   log.error("Exception occurred in addNUpdateFarmer()-> FarmerController "+ e);	
+		}
+		return "site.addFarmer";
+	}
+	
+}

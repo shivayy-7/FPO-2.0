@@ -1,0 +1,23 @@
+package com.fpo.web.services;
+
+import java.util.List;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.fpo.web.entities.FarmerCbboMngmt;
+import com.fpo.web.vos.CbboVO;
+import com.fpo.web.vos.FarmerCbboMngmtVO;
+import com.fpo.web.vos.FpoDtls;
+
+public interface TrainingService {
+
+	ServiceOutcome<FpoDtls> getSceduledTrainingByCode(String searchCode);
+
+	ServiceOutcome<Boolean> manageTraining(FpoDtls fpoDtls);
+
+	ServiceOutcome<List<FarmerCbboMngmtVO>> getCbboMngmntDtls(Long userId);
+
+	ServiceOutcome<Boolean> manageCbboMngmntDtls(CbboVO cbboVo);
+
+	ServiceOutcome<FpoDtls> sceduledTrainingByTabCode(String tabCode);
+
+}

@@ -1,0 +1,351 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ page isELIgnored="false"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles"%>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
+<script src="${contextPath}/assets/vendor/bootstrap-multiselect/bootstrap-multiselect.js"></script>
+<script src="${contextPath}/assets/appJs/validation/common-utils.js"></script>
+<script src="${contextPath}/assets/appJs/ajaxJs/commonAjax.js"></script>
+
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%-- <c:set var="tlength" value="${fn:length(managementDetails)}" /> --%>
+
+<style>
+table .form-control {
+    width: 100%;
+}
+</style>
+
+
+<div class="row mt-3">
+        <div class="col-md-6"> <h5 class="change-color">Register</h5></div>
+        <%@ include file="/WEB-INF/views/message.jsp"%>
+        <div class="col-md-6"> <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item"><a href="#">Farmer
+                  Management</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Member Registration</li>
+            </ol>
+          </nav></div>
+        <div class="col-md-12 ">
+
+          <!-- Rahul Edit -->
+          <c:if test="${empty memberDtls.member}">
+          <hr style="margin-top: 5px;" />
+          <form action="${contextPath}/member/manage-member" id="saveForm" method="POST" enctype="multipart/form-data"> 
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+			<input type="hidden" name="member.status" id="saveStatus"/>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="form-group col-md-2">
+                    <label for="inputEmail4" class="required">Date of Registration<span style="color:red">*</span></label>
+                    <div class="datepicker-box ">
+                      <input type="text" class="form-control form-control-sm datepicker_con" name="dateOfReg" id="dateOfReg"/>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+          <div class="table-responsive">
+            <table
+              class="datatable table table-striped table-bordered exportbtn mt-3 tbl"
+              id="apndTable">
+              <thead>
+                <tr>
+                  <th>Sl No</th>
+                  <th>Name of the Farmer</th>
+                  <th style="width:150px">Aadhar No.</th>
+                  <th>Gender</th>
+                  <th>Caste</th>
+                  <th style="width: 100px;">Total Area in Acre</th>
+                  <th style="width: 100px;">Payment Amount</th>
+                  <th style="width:100px">Mode of Payment</th>
+                  <th style="width:200px">Acchachment</th>
+                  <th><button type="button" class="btn-primary addRow"
+                      title="Add">+</button></th></tr>
+              </thead>
+              <tbody>
+
+                <tr class="gradeA">
+                  <td>1</td>
+                  <td><input type="text" class="form-control form-control-sm" id="name1" name="memberVO[0].name"/></td>
+                  <td><input type="text" class="form-control form-control-sm NumbersOnly" id="aadhar1" onchange="aadharValidation(this.value,'aadhar1')" name="memberVO[0].aadharNo"/></td>
+                  <td>
+                    <select class="form-select" id="gender1" name="memberVO[0].gender.genderId">
+                      <option value="0">-Select-</option>
+                      <c:forEach items="${genderList}" var="gl">
+							<option value="${gl.genderId}" >${gl.genderNameEN}</option>
+					</c:forEach> 
+                    </select>
+                  </td>
+                  <td>
+                    <select class="form-select" id="caste1" name="memberVO[0].caste.casteId">
+                      <option value="0">-Select-</option>
+                      <c:forEach items="${casteList}" var="cast">
+							<option value="${cast.casteId}" >${cast.casteCode}</option>
+					</c:forEach>
+                    </select>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control form-control-sm" id="totalArea1" name="memberVO[0].totalArea"/>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control form-control-sm" id="paymentAmt1" onchange="currencyConverter(this.value,'paymentAmt1')" name="memberVO[0].paymentAmnt"/>
+                  </td>
+                  <td>
+                    <select class="form-select" id="modeOfPayment1" name="memberVO[0].paymentMode">
+                      <option value="0">-Select-</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Online">Online</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div class="calanderholder">
+                      <input type="file" class="form-control form-control-sm" />
+                    </div>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-danger deleteRow"
+                      title="Delete" style="padding: 0px 5px;"><i
+                        class="bx bx-minus"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-12" style="text-align: center;"><button type="button" class="btn-submit" onclick="formSubmit('SAVE')">Submit</button></div>
+          </form>
+          </c:if>
+          
+          <c:if test="${not empty memberDtls.member}">
+          <hr style="margin-top: 5px;" />
+          <form action="${contextPath}/member/manage-member" id="updateForm" method="POST" enctype="multipart/form-data"> 
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+			<input type="hidden" name="member.status" id="updateStatus"/>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="form-group col-md-2">
+                    <label for="inputEmail4">Date of Registration<span style="color:red">*</span></label>
+                    <div class="datepicker-box ">
+                      <input type="text" class="form-control form-control-sm datepicker_con" name="dateOfReg" value="${memberDtls.member.dateOfReg}"/>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+          <div class="table-responsive">
+            <table
+              class="datatable table table-striped table-bordered exportbtn mt-3 tbl" id="apndTable">
+              <thead>
+                <tr>
+                  <th>Sl No</th>
+                  <th>Name of the Farmer</th>
+                  <th style="width:150px">Aadhar No.</th>
+                  <th>Gender</th>
+                  <th>Caste</th>
+                  <th style="width: 100px;">Total Area in Acre</th>
+                  <th style="width: 100px;">Payment Amount</th>
+                  <th style="width:100px">Mode of Payment</th>
+                  <th style="width:200px">Acchachment</th>
+                 </tr>
+              </thead>
+              <tbody>
+
+                <tr class="gradeA">
+                  <td>
+                  <input type="hidden" class="form-control form-control-sm" id="memberId" name="member.memberId" value="${memberDtls.member.memberId}"/>
+                  <input type="hidden" class="form-control form-control-sm" id="memberCode" name="member.memberCode" value="${memberDtls.member.memberCode}"/>
+                  1
+                  </td>
+                  <td><input type="text" class="form-control form-control-sm" id="name1" name="member.name" value="${memberDtls.member.name}"/></td>
+                  <td><input type="text" class="form-control form-control-sm" id="aadhar1" name="member.aadharNo"  value="${memberDtls.member.aadharNo}"/></td>
+                  <td>
+                    <select class="form-select" id="gender1" name="member.gender.genderId" >
+                      <option value="0">-Select-</option>
+                      <c:forEach items="${genderList}" var="gl">
+							<option value="${gl.genderId}" ${gl.genderId eq memberDtls.member.gender.genderId ? 'selected':''}>${gl.genderNameEN}</option>
+					</c:forEach> 
+                    </select>
+                  </td>
+                  <td>
+                    <select class="form-select" id="caste1" name="member.caste.casteId" >
+                      <option value="0">-Select-</option>
+                      <c:forEach items="${casteList}" var="cast">
+							<option value="${cast.casteId}" ${cast.casteId eq memberDtls.member.caste.casteId ? 'selected' : ''}>${cast.casteCode}</option>
+					</c:forEach>
+                    </select>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control form-control-sm" id="totalArea1" name="member.totalArea" value="${memberDtls.member.totalArea}"/>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control form-control-sm" id="paymentAmt1" name="member.paymentAmnt"  value="${memberDtls.member.paymentAmnt}"/>
+                  </td>
+                  <td>
+                    <select class="form-select" id="modeOfPayment1" name="member.paymentMode" >
+                      <option value="0">-Select-</option>
+                      <option value="Cash" ${memberDtls.member.paymentMode eq 'Cash' ? 'selected' : ''}>Cash</option>
+                      <option value="Online" ${memberDtls.member.paymentMode eq 'Online' ? 'selected' : ''}>Online</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div class="calanderholder">
+                      <input type="file" class="form-control form-control-sm" />
+                    </div>
+                  </td>
+                  
+                </tr>
+              </tbody>
+            </table>
+          </div>
+		  <div class="col-md-12" style="text-align: center; margin-top: 10px;">
+				<button type="button" class="btn-submit" onclick="formSubmit('UPDATE')">Update</button>
+		</div>
+			</form>
+          </c:if>
+          
+          <input type="hidden" id="rowLength1" value="1"/> 
+          
+<script>
+
+function formSubmit(status){
+	debugger;
+	if($("#dateOfReg").val() != ''){
+		if(status == 'SAVE'){
+			
+			$("#saveStatus").val(status);
+			$("#saveForm").submit();
+			}else{
+				$("#updateStatus").val(status);
+				$("#updateForm").submit();
+			}
+	}else{
+		alert("Fill the Date Of Registration");
+	}
+	
+	
+}
+
+          let count = 1;
+            //Try to get tbody first with jquery children. works faster!
+            var tbody = $('#apndTable').children('tbody');
+            //Then if no tbody just select your table 
+            var table = tbody.length ? tbody : $('#apndTable');
+
+
+            $('.addRow').click(function() {
+                // Add row
+                debugger;
+                count++;
+                var count11 = $("#rowLength1").val();
+                count11++;
+                var countArrLength = count11 - 1;
+                
+                $("#rowLength1").val(count11);
+                var currRowCount = $("#rowLength1").val() - 1;
+                
+                var name = $("#name"+currRowCount).val();
+        		var aadhar = $("#aadhar"+currRowCount).val();
+        		var gender = $("#gender"+currRowCount).val();
+        		var caste = $("#caste"+currRowCount).val();
+        		var totalArea = $("#totalArea"+currRowCount).val();
+        		var paymentAmt = $("#paymentAmt"+currRowCount).val();
+        		var modeOfPayment = $("#modeOfPayment"+currRowCount).val();
+        		
+        		if(name !="" && aadhar !="" && gender !="0" && caste !="0" && totalArea !="" && paymentAmt!="" && modeOfPayment !="" ){
+        			
+        			table.append('<tr class="gradeA">' +
+                            ' <td>' + count11 + '</td>' +
+                            ' <td><input type="text" class="form-control form-control-sm" id="name' + count11 + '" name="memberVO[' + countArrLength + '].name"/></td>' +
+                            '<td><input type="text" class="form-control form-control-sm NumbersOnly" id="aadhar' + count11 + '" onchange="aadharValidation(this.value,\'aadhar' + count11 + '\')" name="memberVO[' + countArrLength + '].aadharNo"/></td>' +
+                            '<td>' +
+                            ' <select class="form-select" id="gender' + count11 + '" name="memberVO[' + countArrLength + '].gender.genderId">' +
+                            ' <option value="0">-Select-</option>' +
+                            '<c:forEach items="${genderList}" var="gl">' +
+                            '<option value="${gl.genderId}" >${gl.genderNameEN}</option>' +
+                            '</c:forEach> ' +
+                            ' </select>' +
+                            ' </td>' +
+                            ' <td>' +
+                            ' <select class="form-select" id="caste' + count11 + '" name="memberVO[' + countArrLength + '].caste.casteId">' +
+                            '    <option value="0">-Select-</option>' +
+                            ' <c:forEach items="${casteList}" var="cast">' +
+                            '<option value="${cast.casteId}" >${cast.casteCode}</option>' +
+                            '</c:forEach>' +
+                            ' </select>' +
+                            ' </td>' +
+                            ' <td>' +
+                            ' <input type="text" class="form-control form-control-sm" id="totalArea' + count11 + '" name="memberVO[' + countArrLength + '].totalArea"/>' +
+                            '  </td>' +
+                            ' <td>' +
+                            '  <input type="text" class="form-control form-control-sm" id="paymentAmt' + count11 + '" onchange="currencyConverter(this.value, \'paymentAmt' + count11 + '\')"  name="memberVO[' + countArrLength + '].paymentAmnt"/>' +
+                            '  </td>' +
+                            ' <td>' +
+                            ' <select class="form-select" id="modeOfPayment' + count11 + '" name="memberVO[' + countArrLength + '].paymentMode">' +
+                            ' <option value="0">-Select-</option>' +
+                            ' <option value="Cash">Cash</option>' +
+                            ' <option value="Online">Online</option>' +
+                            ' </select>' +
+                            ' </td>' +
+                            '<td>' +
+                            ' <div class="calanderholder">' +
+                            ' <input type="file" class="form-control form-control-sm" />' +
+                            ' </div>' +
+                            ' </td>' +
+                            '<td>' +
+                            ' <button type="button" class="btn-danger deleteRow"' +
+                            ' title="Delete" style="padding: 0px 5px;"><i' +
+                            ' class="bx bx-minus"></i></button>' +
+                            '</td>' +
+                            '</tr>');
+        			
+        		}else{
+        			alert("Can't add empty row ");
+        			count11 = currRowCount;
+        			$("#rowLength1").val(currRowCount);
+        		}
+
+                
+
+                $(document).ready(function() {
+                    $('.datepicker_con').datepick({ dateFormat: 'dd/mm/yyyy' });
+                });
+                $('.rangePicker').datepick({
+                    rangeSelect: true,
+                    showTrigger: '#calImg'
+                });
+            });
+
+            
+             $("#apndTable").on('click', '.deleteRow', function() {
+              $(this).closest("tr").remove();
+              count--;          
+            });
+
+            
+              $(".addinput").click(function(){
+              $("#doc").append('<div class="col-lg-6 removeAllDoc"><div class="row"><div class="form-group col-md-5"><label for="inputEmail4">File Name<span style="color:red">*</span> </label><div class="calanderholder"><input type="text"class="form-control form-control-sm" /></div></div><div class="form-group col-md-7 position-relative"><label for="inputEmail4">Upload Attachment<span style="color:red">*</span> </label><div class="calanderholder"><input type="file"class="form-control form-control-sm" /></div><button class="btn btn-danger btn-sm removeDoc" type="button"><i class="bx bx-minus"></i></button></div></div></div>');
+              });
+
+              $("#doc").on('click', '.removeDoc', function() {
+                $(this).closest(".removeAllDoc").remove();   
+              });
+
+             let sl = 1;
+            //Try to get tbody first with jquery children. works faster!
+            var tbody2 = $('#apndTable2').children('.tbody');
+            //Then if no tbody just select your table 
+            var table2 = tbody2.length ? tbody2 : $('#apndTable2');
+
+
+         </script>
+          

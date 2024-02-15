@@ -1,0 +1,611 @@
+package com.fpo.web.services;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import com.fpo.web.utils.UploadFile;
+import com.fpo.web.utils.UserAdminstrativeUtil;
+import com.fpo.web.utils.YamlAppProperties;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.velocity.runtime.directive.Parse;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.stereotype.Service;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.aashdit.umt.model.Role;
+import com.aashdit.umt.model.RoleLevelMap;
+import com.aashdit.umt.model.User;
+import com.aashdit.umt.repository.RoleLevelMapRepository;
+import com.aashdit.umt.service.AccessService;
+import com.aashdit.umt.service.RoleService;
+import com.aashdit.umt.service.UserService;
+import com.aashdit.umt.util.SecurityHelper;
+import com.fpo.web.entities.Activity;
+import com.fpo.web.entities.Block;
+import com.fpo.web.entities.Component;
+import com.fpo.web.entities.Designation;
+import com.fpo.web.entities.Document;
+import com.fpo.web.entities.FarmerDocument;
+import com.fpo.web.entities.Fpo;
+import com.fpo.web.entities.FpoDemographyMap;
+import com.fpo.web.entities.FpoManagement;
+import com.fpo.web.entities.FpoSchemeMap;
+import com.fpo.web.entities.FpoSubactivityMap;
+import com.fpo.web.entities.Gender;
+import com.fpo.web.entities.MapActivity;
+import com.fpo.web.entities.MapSubActivity;
+import com.fpo.web.entities.Scheme;
+import com.fpo.web.entities.SubActivity;
+import com.fpo.web.entities.Training;
+import com.fpo.web.entities.TrainingFpoMap;
+import com.fpo.web.repositories.ActivityRepository;
+import com.fpo.web.repositories.BlockRepository;
+import com.fpo.web.repositories.CasteRepository;
+import com.fpo.web.repositories.DesignationRepository;
+import com.fpo.web.repositories.DistrictRepository;
+import com.fpo.web.repositories.DocumentRepository;
+import com.fpo.web.repositories.FarmerCbboMngmtRepository;
+import com.fpo.web.repositories.FarmerDocumentRepository;
+import com.fpo.web.repositories.FpoDemographyMapRepository;
+import com.fpo.web.repositories.FpoManagementRepository;
+import com.fpo.web.repositories.FpoRepository;
+import com.fpo.web.repositories.FpoSchemeMapRepository;
+import com.fpo.web.repositories.FpoSubactivityMapRepository;
+import com.fpo.web.repositories.GenderRepository;
+import com.fpo.web.repositories.GrampanchayatRpository;
+import com.fpo.web.repositories.MapActivityRepository;
+import com.fpo.web.repositories.MapSubActivityRepository;
+import com.fpo.web.repositories.SchemeRepository;
+import com.fpo.web.repositories.SubActivityRepository;
+import com.fpo.web.repositories.TrainingFpoMapRepository;
+import com.fpo.web.repositories.TrainingRepository;
+import com.fpo.web.repositories.VillageRepository;
+import com.fpo.web.utils.ApplicationConstants;
+import com.fpo.web.utils.CommonUploadFile;
+import com.fpo.web.vos.FpoDocumentVO;
+import com.fpo.web.vos.FpoDtls;
+import com.fpo.web.vos.FpoManagementVo;
+import com.fpo.web.vos.FpoVo;
+import com.fpo.web.vos.TrainingVO;
+import com.ibm.icu.text.SimpleDateFormat;
+
+import lombok.extern.slf4j.Slf4j;
+
+import javax.transaction.Transactional;
+
+@Service
+@Slf4j
+public class FpoServiceImpl implements FpoService {
+	
+	@Autowired private FpoRepository fpoRepository;
+	
+	@Autowired private FpoManagementRepository fpoMngmtRepository;
+	
+	@Autowired private ModelMapper modelMapper;
+	
+	@Autowired private FpoSubactivityMapRepository fpoSubActMapRepository;
+	
+	@Autowired private SubActivityRepository subActivityRepository;
+	
+	@Autowired private DesignationRepository designationRepository;
+	
+	@Autowired private GenderRepository genderRepository;
+	
+	@Autowired private MapSubActivityRepository mapSubActivityRepository;
+	
+	@Autowired private FpoSubactivityMapRepository fpoSubactivityMapRepository;
+
+	@Autowired private MapActivityRepository mapActRepository;
+	
+	@Autowired private ActivityRepository actRepository;
+	
+	@Autowired private SchemeRepository schemeRepository;
+	
+	@Autowired private TrainingRepository trainingRepository;
+	
+	@Autowired private FarmerCbboMngmtRepository farmerCbboMngmtRepository;
+	
+	@Autowired private RoleService roleService;
+    
+    @Autowired private UserService userService;
+    
+    @Autowired private RoleLevelMapRepository roleLevelMapRepository;
+    
+    @Autowired private AccessService accessService;
+
+	@Autowired private YamlAppProperties YamlAppProperties;
+    
+    @Autowired private DocumentRepository documentRepository;
+    
+    @Autowired private FarmerDocumentRepository farmerDocumentRepository;
+    
+    @Autowired private BlockRepository blockRepository;
+    
+    @Autowired private TrainingFpoMapRepository trainingFpoMapRepository;
+    
+    @Autowired private CommonService commonService;
+	
+	@Autowired private UserAdminstrativeUtil userAdminstrative;
+	
+	@Autowired private CasteRepository casteRepository;
+	
+	@Autowired private FpoSchemeMapRepository fpoSchemeMapRepository;
+	
+	@Autowired private FpoDemographyMapRepository fpoDemographyMapRepository;
+	
+	@Autowired private DistrictRepository districtRepository;
+	
+	@Autowired private GrampanchayatRpository grampanchayatRpository;
+	
+	@Autowired private VillageRepository villageRepository;
+	
+	
+	@Override
+	@Transactional
+	public ServiceOutcome<Boolean> saveFpoDtls(FpoDtls fpoDtls) {
+		ServiceOutcome<Boolean> soc = new ServiceOutcome<>();
+		Random rand = new Random();
+		User user = SecurityHelper.getCurrentUser();
+		Long[] isPrimary=new Long[] {1l};
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			
+			  Fpo existingFpo = Optional.ofNullable(fpoDtls.getFpoVo().getFpoId())
+					  					.flatMap(fpoRepository::findById) .orElseGet(Fpo::new);
+			 
+			  BeanUtils.copyProperties(fpoDtls.getFpoVo(), existingFpo);
+			
+			if(!Optional.ofNullable(fpoDtls.getFpoVo().getFpoId()).isPresent()) {
+			    String fpoCode = "FPO_" + rand.ints(48, 100)
+			        .filter(num -> (num < 58 || num > 64) && (num < 91 || num > 96))
+			        .limit(6)
+			        .mapToObj(c -> (char) c)
+			        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+			        .toString();
+			    existingFpo.setFpoCode(fpoCode);
+			    existingFpo.setCreatedBy(user);
+			    existingFpo.setCreatedOn(new Date());
+				}else {
+					existingFpo.setFpoCode(fpoDtls.getFpoVo().getFpoCode());
+					existingFpo.setLastUpdatedBy(user);
+					existingFpo.setLastUpdatedOn(new Date());
+				}
+			
+//			existingFpo.setBlockId(Optional.ofNullable(fpoDtls.getFpoDemographyVO().getBlockId().getBlockId()).isPresent() ? blockRepository.findByBlockId(fpoDtls.getFpoDemographyVO().getBlockId().getBlockId()) : null);
+//			existingFpo.setScheme(Optional.ofNullable(fpoDtls.getFpoVo().getScheme().getSchemeId()).isPresent() ? schemeRepository.findBySchemeId(fpoDtls.getFpoVo().getScheme().getSchemeId()) : null);
+			existingFpo.setDateOfReg(dateTimeFormat.parse(fpoDtls.getFpoVo().getDateOfReg()));
+			existingFpo.setDateOfIncorporation(dateTimeFormat.parse(fpoDtls.getFpoVo().getDateOfIncorporation()));
+			existingFpo.setActive(true);
+			existingFpo.setUserId(null);
+			Fpo savedFpo = fpoRepository.save(existingFpo);
+
+//			if(Optional.ofNullable(fpoDtls.getFpoVo().getFpoId()).isPresent()) {
+				
+//				List<FpoSubactivityMap> findByFpoCodeFpoCode = fpoSubactivityMapRepository.findByFpoCodeFpoCode(savedFpo.getFpoCode());
+//				fpoSubActMapRepository.deleteAll(findByFpoCodeFpoCode);
+//				findByFpoCodeFpoCode.forEach(existingSubAct->{
+//					fpoDtls.getFpoVo().getSubActivity().forEach(subAct->{
+//						SubActivity subActDtls = subActivityRepository.findBySubActCodeAndIsActiveTrue(subAct);
+//						existingSubAct.setSubActivityId(subActDtls);
+//						existingSubAct.setFpoCode(savedFpo);
+//						existingSubAct.setLastUpdatedOn(new Date());
+//						existingSubAct.setLastUpdatedBy(user);
+//						existingSubAct.setActive(true);
+//				        fpoSubActMapRepository.save(existingSubAct);
+//					});
+//				});
+				
+//			}
+			FpoDemographyMap fpoDemographymap = Optional.ofNullable(fpoDtls.getFpoDemographyVO().getDemographyId())
+												        .flatMap(fpoDemographyMapRepository::findById)
+												        .orElseGet(FpoDemographyMap::new);
+			if(Optional.ofNullable(fpoDemographymap.getDemographyId()).isPresent()) {
+				BeanUtils.copyProperties(fpoDtls.getFpoDemographyVO(), fpoDemographymap);
+				fpoDemographymap.setLastUpdatedBy(user);
+				fpoDemographymap.setLastUpdatedOn(new Date());
+			}else {
+				BeanUtils.copyProperties(fpoDtls.getFpoDemographyVO(), fpoDemographymap);
+				fpoDemographymap.setCreatedBy(user);
+				fpoDemographymap.setCreatedOn(new Date());
+			}
+			fpoDemographymap.setDistId(Optional.ofNullable(fpoDtls.getFpoDemographyVO().getDistId().getDistrictId()).isPresent()?districtRepository.findByDistrictId(fpoDtls.getFpoDemographyVO().getDistId().getDistrictId()) : null);
+			fpoDemographymap.setBlockId(Optional.ofNullable(fpoDtls.getFpoDemographyVO().getBlockId().getBlockId()).isPresent()?blockRepository.findByBlockId(fpoDtls.getFpoDemographyVO().getBlockId().getBlockId()) : null);
+//			fpoDemographymap.setGpId(Optional.ofNullable(fpoDtls.getFpoDemographyVO().getGpId().getGpId()).isPresent()?grampanchayatRpository.findByGpId(fpoDtls.getFpoDemographyVO().getGpId().getGpId()) : null);
+//			fpoDemographymap.setVillageId(Optional.ofNullable(fpoDtls.getFpoDemographyVO().getVillageId().getVillageId()).isPresent()?villageRepository.findByVillageId(fpoDtls.getFpoDemographyVO().getVillageId().getVillageId()) : null);
+			fpoDemographymap.setActive(true);
+			fpoDemographymap.setFpoId(savedFpo);
+			FpoDemographyMap saveFpoDemoMap = fpoDemographyMapRepository.save(fpoDemographymap);
+			
+			
+			List<FpoSubactivityMap> findByFpoFpoId = fpoSubActMapRepository.findByFpoFpoId(savedFpo.getFpoId());
+			List<Long> existingSubActIds = findByFpoFpoId.stream()
+														 .map(subActId->{
+															return subActId.getFpoSubactivityId();
+														}).collect(Collectors.toList());
+			
+			fpoDtls.getFpoVo().getSubActivity().forEach(subAct->{
+				
+				existingSubActIds.forEach(subActid->{
+					Optional<FpoSubactivityMap> findByIdSubAct = fpoSubActMapRepository.findById(subActid);
+					if(findByIdSubAct.isPresent()) {
+						findByIdSubAct.get().setActive(true);
+						findByIdSubAct.get().setFpo(savedFpo);
+						findByIdSubAct.get().setSubActivityId(subActivityRepository.findBySubActCodeAndIsActiveTrue(subAct));
+						findByIdSubAct.get().setLastUpdatedBy(user);
+						findByIdSubAct.get().setLastUpdatedOn(new Date());
+						fpoSubActMapRepository.save(findByIdSubAct.get());
+						existingSubActIds.remove(subActid);
+					}else {
+						FpoSubactivityMap newFpoSubActMap = new FpoSubactivityMap();
+						newFpoSubActMap.setActive(true);
+						newFpoSubActMap.setFpo(savedFpo);
+						newFpoSubActMap.setSubActivityId(subActivityRepository.findBySubActCodeAndIsActiveTrue(subAct));
+						newFpoSubActMap.setCreatedBy(user);
+						newFpoSubActMap.setCreatedOn(new Date());
+						fpoSubActMapRepository.save(newFpoSubActMap);
+					}
+				});
+				});
+			
+			existingSubActIds.forEach(subActId->{
+				Optional<FpoSubactivityMap> findByIdSubAct = fpoSubActMapRepository.findById(subActId);
+				if(findByIdSubAct.isPresent()) {
+					findByIdSubAct.get().setActive(false);
+					fpoSubActMapRepository.save(findByIdSubAct.get());
+				}
+			});
+			
+			// trial
+//			List<FpoSubactivityMap> existingSubActMaps = fpoSubActMapRepository.findByFpoFpoId(savedFpo.getFpoId());
+//
+//			// Create a map for quicker lookup by subActivityId
+//			Map<Long, FpoSubactivityMap> subActMapBySubActId = existingSubActMaps.stream()
+//			        .collect(Collectors.toMap(FpoSubactivityMap::getFpoSubactivityId, Function.identity()));
+//
+//			fpoDtls.getFpoVo().getSubActivity().forEach(subAct -> {
+//			    FpoSubactivityMap existingSubActMap = subActMapBySubActId.get(subAct.getSubActivityId());
+//
+//			    if (existingSubActMap != null) {
+//			        existingSubActMap.setActive(true);
+//			        existingSubActMap.setFpo(savedFpo);
+//			        existingSubActMap.setSubActivityId(subActivityRepository.findBySubActCodeAndIsActiveTrue(subAct));
+//			        existingSubActMap.setLastUpdatedBy(user);
+//			        existingSubActMap.setLastUpdatedOn(new Date());
+//			        fpoSubActMapRepository.save(existingSubActMap);
+//			    } else {
+//			        FpoSubactivityMap newFpoSubActMap = new FpoSubactivityMap();
+//			        newFpoSubActMap.setActive(true);
+//			        newFpoSubActMap.setFpo(savedFpo);
+//			        newFpoSubActMap.setSubActivityId(subActivityRepository.findBySubActCodeAndIsActiveTrue(subAct));
+//			        newFpoSubActMap.setCreatedBy(user);
+//			        newFpoSubActMap.setCreatedOn(new Date());
+//			        fpoSubActMapRepository.save(newFpoSubActMap);
+//			    }
+//			});
+//
+//			existingSubActMaps.forEach(existingSubActMap -> {
+//			    if (!existingSubActMap.isActive()) {
+//			        existingSubActMap.setActive(false);
+//			        fpoSubActMapRepository.save(existingSubActMap);
+//			    }
+//			});
+
+			
+			List<FpoManagement> fpoMngList = new ArrayList<FpoManagement>();
+			fpoDtls.getFpoMngmtVo().forEach(obj->{
+				
+				FpoManagement fpoManage = Optional.ofNullable(obj.getDirectorId())
+									              .flatMap(fpoMngmtRepository::findById)
+									              .orElseGet(FpoManagement::new);
+				
+				if(Optional.ofNullable(fpoManage.getDirectorId()).isPresent()) {
+					Long fpoMngId = obj.getDirectorId();
+							BeanUtils.copyProperties(obj, fpoManage);
+							fpoManage.setCreatedBy(fpoManage.getCreatedBy());
+							fpoManage.setCreatedOn(fpoManage.getCreatedOn());
+							fpoManage.setFpoId(savedFpo);
+							fpoManage.setLastUpdatedBy(user);
+							fpoManage.setLastUpdatedOn(new Date());
+				}else {
+					BeanUtils.copyProperties(obj, fpoManage);
+					fpoManage.setFpoId(savedFpo);
+					fpoManage.setCreatedBy(user);
+					fpoManage.setCreatedOn(new Date());
+				}
+				fpoManage.setGender(Optional.ofNullable(obj.getGender().getGenderId()).isPresent()? genderRepository.findById(obj.getGender().getGenderId()).get() : null  );
+				fpoManage.setDesignation(Optional.ofNullable(obj.getDesignation().getDesignationId()).isPresent()? designationRepository.findById(obj.getDesignation().getDesignationId()).get() : null);
+				fpoManage.setCaste(Optional.ofNullable(obj.getCaste().getCasteId()).isPresent()? casteRepository.findById(obj.getCaste().getCasteId()).get() : null);
+				fpoManage.setActive(true);
+				try {
+					fpoManage.setAppointmentDate(dateTimeFormat.parse(obj.getAppointmentDate()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				fpoMngList.add(fpoManage);
+			});
+			List<FpoManagement> saveAll = fpoMngmtRepository.saveAll(fpoMngList);
+			
+			List<FpoSchemeMap> FpoSchemeMapList = new ArrayList<FpoSchemeMap>();
+			
+			fpoDtls.getFpoSchemeMapVO().forEach(fpoScheme->{
+				
+				FpoSchemeMap fpoSchememap = Optional.ofNullable(fpoScheme.getSchemeMngmntId())
+				        .flatMap(fpoSchemeMapRepository::findById)
+				        .orElseGet(FpoSchemeMap::new);
+				
+				if(Optional.ofNullable(fpoSchememap.getSchemeMngmntId()).isPresent()) {
+					BeanUtils.copyProperties(fpoScheme, fpoSchememap);
+					fpoSchememap.setLastUpdatedBy(user);
+					fpoSchememap.setLastUpdatedOn(new Date());
+				}else {
+					BeanUtils.copyProperties(fpoScheme, fpoSchememap);
+					fpoSchememap.setCreatedBy(user);
+					fpoSchememap.setCreatedOn(new Date());
+				}
+				 Scheme findBySchemeCode = schemeRepository.findBySchemeCode(fpoScheme.getSchemeName().getSchemeCode());
+				fpoSchememap.setSchemeName(findBySchemeCode);
+				FpoSchemeMapList.add(fpoSchememap);
+			});
+			List<FpoSchemeMap> saveAllFpoSchemeMap = fpoSchemeMapRepository.saveAll(FpoSchemeMapList);
+			
+//			List<FarmerDocument> farmerDocList = new ArrayList<>();
+//
+//			if (Optional.ofNullable(fpoDtls.getFpoDocVo().getIncorporationCertificate()).isPresent()) {
+//			    FarmerDocument farmerDoc = new FarmerDocument();
+//			    farmerDoc.setDocId(documentRepository.findByDocCode(ApplicationConstants.INCORPORATION));
+//			    farmerDoc.setPath(UploadFile.uploadForArticle(null, fpoDtls.getFpoDocVo().getIncorporationCertificate(), YamlAppProperties.getPath(), RandomStringUtils.random(6, true, true).toUpperCase()));
+//			    farmerDoc.setCreatedBy(user);
+//			    farmerDocList.add(farmerDoc);
+//			} if (Optional.ofNullable(fpoDtls.getFpoDocVo().getPan()).isPresent()) {
+//			    FarmerDocument farmerDoc = new FarmerDocument();
+//			    farmerDoc.setDocId(documentRepository.findByDocCode(ApplicationConstants.PAN));
+//			    farmerDoc.setPath(UploadFile.uploadForArticle(null, fpoDtls.getFpoDocVo().getPan(), YamlAppProperties.getPath(), RandomStringUtils.random(6, true, true).toUpperCase()));
+//			    farmerDoc.setCreatedBy(user);
+//			    farmerDocList.add(farmerDoc);
+//			} if (Optional.ofNullable(fpoDtls.getFpoDocVo().getMsmeCertificate()).isPresent()) {
+//			    FarmerDocument farmerDoc = new FarmerDocument();
+//			    farmerDoc.setDocId(documentRepository.findByDocCode(ApplicationConstants.UDYOG_MSME));
+//			    farmerDoc.setPath(UploadFile.uploadForArticle(null, fpoDtls.getFpoDocVo().getMsmeCertificate(), YamlAppProperties.getPath(), RandomStringUtils.random(6, true, true).toUpperCase()));
+//			    farmerDoc.setCreatedBy(user);
+//			    farmerDocList.add(farmerDoc);
+//			} if (Optional.ofNullable(fpoDtls.getFpoDocVo().getOthers()).isPresent()) {
+//			    FarmerDocument farmerDoc = new FarmerDocument();
+//			    farmerDoc.setDocId(documentRepository.findByDocCode(ApplicationConstants.OTHERS));
+//			    farmerDoc.setPath(UploadFile.uploadForArticle(null, fpoDtls.getFpoDocVo().getOthers(), YamlAppProperties.getPath(), RandomStringUtils.random(6, true, true).toUpperCase()));
+//			    farmerDocList.add(farmerDoc);
+//			}
+//
+//			if (farmerDocList.size() > 0) {
+//			    System.out.println(farmerDocList);
+//			    farmerDocList.forEach(doc -> {
+//			        doc.setCreatedBy(user);
+//			        doc.setCreatedOn(new Date());
+//			        doc.setActive(true);
+//			        doc.setFpoId(savedFpo);
+//			        farmerDocumentRepository.save(doc);
+//			    });
+//			}
+
+			
+			//FPO user creation
+			if(fpoDtls.getFpoVo().getStatus().equalsIgnoreCase("SAVE")) {
+				
+				ServiceOutcome<Role> role = roleService.getRoleByCode(ApplicationConstants.ROLE_FPO);
+				Long[] roleId=new Long[] {role.getData().getRoleId()};
+				ServiceOutcome<User> newUser = userService.addUser(savedFpo.getFpoCode(),savedFpo.getFpoName(),"",new Date(),"NA" ,"NA",roleId,isPrimary,role.getData().getRoleCode());
+				List<RoleLevelMap> rolelevelMapList=roleLevelMapRepository.findByRoleId(roleId[0]);
+				ServiceOutcome<String> svcOutcome = accessService.saveConfig(newUser.getData().getUserId(), roleId[0], rolelevelMapList.get(0).getLevelId(), saveFpoDemoMap.getBlockId().getBlockId());
+				savedFpo.setUserId(newUser.getData());
+				fpoRepository.save(savedFpo);
+			}
+
+			soc.setOutcome(true);
+			soc.setMessage(fpoDtls.getFpoVo().getFpoId() == null ? "Fpo Register Sucessfull..." : "Fpo Updated Successfull");
+		} catch (Exception e) {
+			log.error("Exception occurred in saveFpoDtls() -> FpoServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("Unable to Process, PleaseTry after some time");
+		}
+		return soc;
+	}
+
+
+	@Override
+	public ServiceOutcome<FpoDtls> getFpoByCode(String fpoCode) {
+		ServiceOutcome<FpoDtls> soc = new ServiceOutcome<>();
+		FpoDtls fpoDtls = new FpoDtls();
+		User user = SecurityHelper.getCurrentUser();
+		try {
+			Optional<Fpo> fpo = fpoRepository.findByFpoCode(fpoCode);
+			Long schemeId = fpo.get().getScheme().getSchemeId();
+			if(fpo.isPresent()) {
+				FpoVo fpoVo = modelMapper.map(fpo.get(), FpoVo.class);
+
+				
+				List<Long> allAdminstrativeId = userAdminstrative.getAllAdminstrativeId(user);
+				ServiceOutcome<List<?>> blockNameList = commonService.getAdminstartiveNameByAdminstrativeId(allAdminstrativeId, "BLOCK");
+				fpoDtls.setBlockList((List<Block>)blockNameList.getData());
+
+				fpoVo.setBlockId(blockRepository.findByBlockId(fpo.get().getBlockId().getBlockId()));
+				
+				
+				List<FpoSubactivityMap> subActivityList = fpoSubActMapRepository.findByFpoCodeFpoCode(fpo.get().getFpoCode());
+				List<String> subActList = new ArrayList<>();
+				subActivityList.forEach(subAct -> {
+				    Long id = subAct.getSubActivityId().getId();
+				    subActList.add(id.toString());
+				    System.out.println("SubActivity -"+id);
+				});
+				fpoVo.setSubActivity(subActList);
+				
+				
+				for (String subAct : subActList) {
+					SubActivity subActivity = subActivityRepository.findById(Long.parseLong(subAct)).get();
+					List<MapSubActivity> mapSubActivity = mapSubActivityRepository.findBySubActCodeSubActCode(subActivity.getSubActCode());
+					mapSubActivity.forEach(mapSub->{
+						String actCode = mapSub.getActCode().getActCode();
+						fpoVo.setActivity(actCode);
+						System.out.println("Activity -"+actCode);
+						
+						Activity activity = actRepository.findByActCode(actCode);
+						System.out.println(activity.getId());
+						MapActivity mapActivity = mapActRepository.findById(activity.getId()).get();
+						System.out.println(mapActivity);
+						fpoVo.setComponent( mapActivity.getComponent().getCmpCode());
+					});
+				}
+				
+				SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+		        Date dateOfReg = dateTimeFormat.parse(fpo.get().getDateOfRegn().toString());
+				Date dateOfIncorporation = dateTimeFormat.parse(fpo.get().getDateOfIncorporation().toString());
+
+		        // Extract only the year, month, and day
+		        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		        String formattedDateOfReg = dateFormat.format(dateOfReg);
+		        fpoVo.setDateOfReg(formattedDateOfReg);
+		        String formatDateOfIncorporation = dateFormat.format(dateOfIncorporation);
+		        fpoVo.setDateOfIncorporation(formatDateOfIncorporation);
+		        fpoVo.setScheme(schemeRepository.findBySchemeId(schemeId));
+		        
+				fpoDtls.setFpoVo(fpoVo);// set FPOVO in FPODTLS
+				
+				/*FpoManagement Details*/
+				List<FpoManagement> fpoManagementList = fpoMngmtRepository.findByFpoIdFpoId(fpo.get().getFpoId());
+				List<FpoManagementVo> mngmntArray = new ArrayList<>();
+
+				fpoDtls.setFpoMngmtVo(mngmntArray);
+				fpoManagementList.forEach(mngmntDtls->{
+//					FpoManagementVo fpomngmnt = modelMapper.map(mngmntDtls, FpoManagementVo.class);
+					FpoManagementVo fpomngmnt = new FpoManagementVo();
+//					fpomngmnt.setGender(mngmntDtls.getGender());
+//					fpomngmnt.setDesignation(mngmntDtls.getDesignation());
+//					fpomngmnt.setFpoMngmtId(mngmntDtls.getFpoMngmtId());
+//					fpomngmnt.setAdharNo(mngmntDtls.getAdharNo());
+//					fpomngmnt.setAge(mngmntDtls.getAge());
+//					fpomngmnt.setDin(mngmntDtls.getDin());
+//					fpomngmnt.setFpoMngmtName(mngmntDtls.getFpoMngmtName());
+//					fpomngmnt.setMobile(mngmntDtls.getMobile());
+//					fpomngmnt.setPan(mngmntDtls.getPan());
+//					fpomngmnt.setQualification(mngmntDtls.getQualification());
+//					fpomngmnt.setFpoMngmtId(mngmntDtls.getFpoMngmtId());
+//					fpomngmnt.setFpoId(mngmntDtls.getFpoId().getFpoId());
+//					System.out.println("DATE->" +mngmntDtls.getAppointmentDate().toString());
+//					fpomngmnt.setAppointmentDate(mngmntDtls.getAppointmentDate().toString());
+//					fpomngmnt.setShare(mngmntDtls.getShare());
+//					fpomngmnt.setCaste(mngmntDtls.getCaste());
+					BeanUtils.copyProperties(mngmntDtls, fpomngmnt);
+					mngmntArray.add(fpomngmnt);
+				});
+				fpoDtls.setFpoMngmtVo(mngmntArray);
+				
+				List<FarmerDocument> farmerDocuments = farmerDocumentRepository.findByFpoIdFpoId(fpo.get().getFpoId());
+				FpoDocumentVO documentVo = new FpoDocumentVO();
+//				documentVo.setIncorporationCertificateId(farmerDocumentRepository.findByDocIdDocCodeAndFpoIdFpoId(ApplicationConstants.INCORPORATION, fpo.get().getFpoId()).getFarmerDocId());
+//				documentVo.setPanId(farmerDocumentRepository.findByDocIdDocCodeAndFpoIdFpoId(ApplicationConstants.PAN, fpo.get().getFpoId()).getFarmerDocId());
+//				documentVo.setMsmeCertificateId(farmerDocumentRepository.findByDocIdDocCodeAndFpoIdFpoId(ApplicationConstants.UDYOG_MSME, fpo.get().getFpoId()).getFarmerDocId());
+//				documentVo.setOthersId(farmerDocumentRepository.findByDocIdDocCodeAndFpoIdFpoId(ApplicationConstants.OTHERS, fpo.get().getFpoId()).getFarmerDocId());
+				fpoDtls.setFpoDocVo(documentVo);
+				
+			}
+			System.out.println(fpoDtls);
+			soc.setData(fpoDtls);
+			soc.setMessage("success");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception occurred in getFpoByCode() -> FpoServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("error");
+		}
+		return soc;
+	}
+
+
+	@Override
+	public ServiceOutcome<FpoDtls> isEventAvailable(User user) {
+		ServiceOutcome<FpoDtls> soc = new ServiceOutcome<>();
+		FpoDtls fpoDtls = new FpoDtls();
+		List<TrainingFpoMap> trainingFpoMapList = new ArrayList<>();
+		try {
+			
+			Optional<Fpo> fpoUser = fpoRepository.findByUserIdUserId(user.getUserId());
+			if(fpoUser.isPresent()) {
+				List<TrainingFpoMap> findByFpoIdFpoId = trainingFpoMapRepository.findByFpoIdFpoId(fpoUser.get().getFpoId());
+				List<Training> trainingList = new ArrayList<>();
+				if(findByFpoIdFpoId.size()>0) {
+					findByFpoIdFpoId.forEach(fpoId->{
+						List<TrainingFpoMap> findByFpoIdFpoId2 = trainingFpoMapRepository.findByFpoIdFpoId(fpoId.getFpoId().getFpoId());
+						findByFpoIdFpoId2.forEach(training->{
+							Training trainingId = training.getTrainingId();
+							trainingList.add(trainingId);
+							trainingFpoMapList.add(training);
+						});
+					});
+					 fpoDtls.setTrainingList(trainingList);
+					 fpoDtls.setTrainingFpoMap(trainingFpoMapList);
+				}
+			}
+			soc.setData(fpoDtls);
+			soc.setMessage("success");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			log.error("Exception occurred in isEventAvailable() -> FpoServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("error");
+		}
+		
+		return soc;
+	}
+
+
+	@Override
+	public ServiceOutcome<List<TrainingFpoMap>> setEventAcceptanceValue(String eventCode, String status) {
+		ServiceOutcome<List<TrainingFpoMap>> soc = new ServiceOutcome<>();
+		List<TrainingFpoMap> trainingFpoMapList = new ArrayList<TrainingFpoMap>();
+		try {
+			User user = SecurityHelper.getCurrentUser();
+			List<TrainingFpoMap> findByTrainingIdTrainingCode = trainingFpoMapRepository.findByTrainingIdTrainingCode(eventCode);
+			findByTrainingIdTrainingCode.forEach(findFpoId->{
+				
+				if (findFpoId.getFpoId().getUserId() != null) {
+				    // Access the user's properties safely here
+				    if (findFpoId.getFpoId().getUserId().getUserId().equals(user.getUserId())) {
+				    	findFpoId.setTrainingAcceptance(status.equals("ACCEPT") ? true : false);
+						TrainingFpoMap saveTrainingFpo = trainingFpoMapRepository.save(findFpoId);
+						trainingFpoMapList.add(saveTrainingFpo);
+				    }
+				} else {
+				}
+			});
+			
+			soc.setData(trainingFpoMapList);
+			soc.setMessage(status.equals("ACCEPT")?"Event Accepted":"EVENT REJECTED");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			log.error("Exception occurred in setEventAcceptanceValue() -> FpoServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("Unavailable to progress...");
+		}
+		return soc;
+	}
+	
+	
+   
+
+
+}

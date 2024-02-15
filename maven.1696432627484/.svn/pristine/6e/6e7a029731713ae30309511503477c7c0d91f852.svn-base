@@ -1,0 +1,46 @@
+package com.fpo.web.utils;
+
+public class ApplicationConstants {
+	private ApplicationConstants() {
+	}
+	public static final String DRAFT = "DRAFT";
+	public static final String PENDING = "PENDING";
+	public static final String APPROVED = "APPROVED";
+	public static final String REVERTED = "REVERTED";
+	
+	// ROLE
+	public static final String ROLE_TRAINER = "ROLE_TRAINER";
+	public static final String ROLE_CBBO = "ROLE_CBBO";
+	public static final String ROLE_FPO = "ROLE_FPO";
+
+	public static final String APPL_MODULE_INSTALLMENT = "INSTALLMENT";
+	public static final String MODULE_FORM_INSTALLMENT = "INSTALLMENT";
+
+	public static final String INSTALLMENT_ROUT_TYPE = "FPO-IN-CBBO-DMC-CBBO-APP";
+	
+	//DOCUMENT NAME
+	public static final String INCORPORATION = "INCORPORATION CERTIFICATE";
+	public static final String PAN = "PAN";
+	public static final String UDYOG_MSME = "UDYOG/MSME CERTIFICATE";
+	public static final String OTHERS = "OTHERS";
+	
+	//GET DATE
+	public static final String DISTRICT = "DISTRICT";
+	public static final String STATE = "STATE";
+	public static final String BLOCK = "BLOCK";
+	public static final String BANK = "BANKBRANCH";
+	public static final String COMPONENT = "COMPONENT";
+	public static final String DESIGNATION = "DESIGNATION";
+	public static final String GENDER = "GENDER";
+	public static final String FPO = "FPO";
+	public static final String SCHEME = "SCHEME";
+	public static final String CBBO = "CBBO";
+	public static final String SUBJECT = "SUBJECT";
+	public static final String CBBO_MNGMNT = "CBBO_MNGMNT";
+	public static final String TRAINING_LIST = "TRAINING_LIST";
+	public static final String CASTE = "CASTE";
+	
+
+	
+	   
+}

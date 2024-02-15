@@ -1,0 +1,57 @@
+spring:
+  profiles:
+    active: @spring.profiles.active@
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+  datasource:
+    platform: postgres
+    hikari:
+      connection-timeout: 10000
+      maximum-pool-size: 20
+      minimum-idle: 8
+      pool-name: ec
+      leak-detection-threshold: 10000
+
+
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      use-new-id-generator-mappings: false
+
+  servlet:
+    multipart:
+      max-file-size: 6MB
+      max-request-size: 60MB
+server:
+  port: 7008
+  servlet:
+    context-path: /dummy-setup
+
+post:
+  login:
+    url: /home
+
+captcha:
+  options: is
+
+fpo:
+  path: /opt/tomcat/webapps/
+  auth: true
+  enable: true
+  host: smtp.gmail.com
+  trust: smtp.gmail.com
+  port: 587
+  protocol: TLSv1.2
+  username: aashdittechnologies6@gmail.com
+  password: Aashdit@1234$
+  
+#  messages:
+#    basename: messages
+#
+#    main:
+#    allow-bean-definition-overriding: true
+
+

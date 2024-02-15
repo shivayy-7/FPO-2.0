@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "post.login.url",
+    "type": "java.lang.String",
+    "description": "A description for 'post.login.url'"
+  },
+  {
+    "name": "captcha.options",
+    "type": "java.lang.String",
+    "description": "A description for 'captcha.options'"
+  }
+]}

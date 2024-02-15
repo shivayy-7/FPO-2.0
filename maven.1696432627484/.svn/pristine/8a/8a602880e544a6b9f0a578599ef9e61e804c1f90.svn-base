@@ -1,0 +1,105 @@
+package com.fpo.web.controllers;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.aashdit.umt.model.User;
+import com.aashdit.umt.util.SecurityHelper;
+import com.fpo.web.services.CommonService;
+import com.fpo.web.services.TrainingService;
+import com.fpo.web.vos.CbboVO;
+import com.fpo.web.vos.FarmerCbboMngmtVO;
+import com.fpo.web.vos.FpoDtls;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@RequestMapping("/training")
+@Slf4j
+public class TrainingController {
+	
+	@Autowired private CommonService commonService;
+	
+	@Autowired private TrainingService trainingService;
+	
+	@GetMapping
+	public String fpoTraining(Model model, @RequestParam(value="status", required = false, defaultValue = "SAVE")String status,
+										   @RequestParam(value="searchCode", required = false) String searchCode,
+										   @RequestParam(value="tabCode", required = false, defaultValue = "UPCOMING")String tabCode) {
+		try {
+			if(Optional.ofNullable(searchCode).isPresent()) {
+				ServiceOutcome<FpoDtls> sceduledTrainingByCode = trainingService.getSceduledTrainingByCode(searchCode);
+				model.addAttribute("trainingDtls", sceduledTrainingByCode.getData());
+//			attr.addFlashAttribute("trainingList", commonService.getAllData("TRAINING_LIST").getData());
+			}
+			if(Optional.ofNullable(tabCode).isPresent()) {
+				ServiceOutcome<FpoDtls> sceduledTrainingByTabCode = trainingService.sceduledTrainingByTabCode(tabCode);
+				model.addAttribute("sceduledTrainingList", sceduledTrainingByTabCode.getData());
+				model.addAttribute("tabCode", tabCode);
+			}
+			model.addAttribute("SubjectList", commonService.getAllData("SUBJECT").getData());
+			model.addAttribute("FpoList", commonService.getAllData("Fpo").getData());
+			model.addAttribute("cbboMngmntList", commonService.getAllData("CBBO_MNGMNT").getData());
+//			model.addAttribute("trainingList", commonService.getAllData("TRAINING_LIST").getData());
+			
+		} catch (Exception e) {
+			log.error("Exception occurred in fpoTraining()-> TrainingController "+ e.getMessage());
+		}
+		return "site.training";
+	}
+	
+	@PostMapping("/manageTraining")
+	public String manageTraining(FpoDtls fpoDtls, RedirectAttributes attr) {
+		
+		try {
+			ServiceOutcome<Boolean> manageTraining = trainingService.manageTraining(fpoDtls);
+			attr.addFlashAttribute(manageTraining.getOutcome()?"success_msg":"error_msg", manageTraining.getOutcome()?manageTraining.getMessage():manageTraining.getMessage());
+		} catch (Exception e) {
+			log.error("Exception occurred in manageTraining()-> TrainingController "+ e.getMessage());
+		}
+		
+		return "redirect:/training";
+	}
+	
+
+	@GetMapping("/cbboUser")
+	public String cbboUser(Model model) {
+		try {
+			User user = SecurityHelper.getCurrentUser();
+			model.addAttribute("designationList", commonService.getAllData("Designation").getData());
+            model.addAttribute("genderList", commonService.getAllData("Gender").getData());
+			ServiceOutcome<List<FarmerCbboMngmtVO>> cbboMngmntDtls = trainingService.getCbboMngmntDtls(user.getUserId());
+			model.addAttribute("cbboMngmntDtls", cbboMngmntDtls.getData());
+			
+		} catch (Exception e) {
+			log.error("Exception occurred in cbboUser()-> TrainingController "+ e.getMessage());
+		}
+		return "site.cbboUser";
+	}
+	
+	@PostMapping("/manageCbboMngmntDtls")
+	public String manageCbboMngmntDtls(CbboVO cbboVo, RedirectAttributes attr) {
+		try {
+			
+			System.out.println("ForUpdate:"+ cbboVo);
+			ServiceOutcome<Boolean> manageCbboMngmntDtls = trainingService.manageCbboMngmntDtls(cbboVo);
+			attr.addFlashAttribute(manageCbboMngmntDtls.getOutcome()?"success_msg":"error_msg", manageCbboMngmntDtls.getOutcome() ? manageCbboMngmntDtls.getMessage() : manageCbboMngmntDtls.getMessage());
+		} catch (Exception e) {
+			log.error("Exception occurred in manageCbboMngmntDtls()-> TrainingController "+ e.getMessage());
+		}
+		return "redirect:/training/cbboUser";
+	}
+	
+	
+
+}

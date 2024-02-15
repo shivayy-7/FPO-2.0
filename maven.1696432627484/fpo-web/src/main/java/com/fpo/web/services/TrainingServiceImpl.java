@@ -1,0 +1,300 @@
+package com.fpo.web.services;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.aashdit.umt.model.Role;
+import com.aashdit.umt.model.RoleLevelMap;
+import com.aashdit.umt.model.User;
+import com.aashdit.umt.repository.RoleLevelMapRepository;
+import com.aashdit.umt.repository.UserRepository;
+import com.aashdit.umt.service.AccessService;
+import com.aashdit.umt.service.RoleService;
+import com.aashdit.umt.service.UserService;
+import com.aashdit.umt.util.SecurityHelper;
+import com.fpo.web.entities.FarmerCbbo;
+import com.fpo.web.entities.FarmerCbboMngmt;
+import com.fpo.web.entities.Fpo;
+import com.fpo.web.entities.Training;
+import com.fpo.web.entities.TrainingFpoMap;
+import com.fpo.web.repositories.DesignationRepository;
+import com.fpo.web.repositories.FarmerCbboMngmtRepository;
+import com.fpo.web.repositories.FarmerCbboRepository;
+import com.fpo.web.repositories.FpoRepository;
+import com.fpo.web.repositories.GenderRepository;
+import com.fpo.web.repositories.TrainingFpoMapRepository;
+import com.fpo.web.repositories.TrainingRepository;
+import com.fpo.web.utils.ApplicationConstants;
+import com.fpo.web.vos.CbboVO;
+import com.fpo.web.vos.FarmerCbboMngmtVO;
+import com.fpo.web.vos.FpoDtls;
+import com.fpo.web.vos.TrainingDtls;
+import com.fpo.web.vos.TrainingFpoMapVO;
+import com.fpo.web.vos.TrainingVO;
+import com.ibm.icu.text.SimpleDateFormat;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class TrainingServiceImpl implements TrainingService {
+	
+    @Autowired private TrainingRepository trainingRepository;
+	
+	@Autowired private FarmerCbboMngmtRepository farmerCbboMngmtRepository;
+	
+	@Autowired private FarmerCbboRepository farmerCbboRepository;
+	
+	@Autowired
+    private RoleService roleService;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private RoleLevelMapRepository roleLevelMapRepository;
+    
+    @Autowired
+    private AccessService accessService;
+    
+    @Autowired
+    private GenderRepository genderRepository;
+    
+    @Autowired
+    private DesignationRepository designationRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private TrainingFpoMapRepository traningFpoMapRepository;
+    
+    @Autowired
+    private FpoRepository fpoRepository;
+
+	@Override
+	@Transactional
+	public ServiceOutcome<TrainingDtls> addNUpdateTraining(TrainingDtls trainingDtls) {
+		ServiceOutcome<TrainingDtls> soc = new ServiceOutcome<TrainingDtls>();
+		TrainingDtls trainingDtl = new TrainingDtls();
+		Random rand = new Random();
+		SimpleDateFormat adjustedFormat = new SimpleDateFormat("dd/MM/yyyy");
+		User user = SecurityHelper.getCurrentUser();
+		try {
+			Training training = Optional.ofNullable(trainingDtls.getTrainingVO().getTrainingId())
+			        .flatMap(trainingRepository::findById)
+			        .map(existingTraining->{
+			        	BeanUtils.copyProperties(trainingDtls.getTrainingVO(), existingTraining);
+			        	try {
+							existingTraining.setDateOfTraining(adjustedFormat.parse(trainingDtls.getTrainingVO().getDateOfTraining().trim()));
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+			        	existingTraining.setIsActive(true);
+			        	existingTraining.setLastUpdatedBy(user);
+			        	existingTraining.setLastUpdatedOn(new Date());
+			        	Training updateTraining = trainingRepository.save(existingTraining);
+			        	
+//			        	List<Long> collectId = traningFpoMapRepository.findByTrainingIdTrainingId(updateTraining.getTrainingId())
+//									        	                       .stream()
+//									        	                       .map(trainingId->{
+//									        	                    	   return trainingId.getTrainingFpoId();
+//									        	                       }).collect(Collectors.toList());
+			        	
+			        	List<TrainingFpoMap> findByTrainingId = traningFpoMapRepository.findByTrainingIdTrainingId(updateTraining.getTrainingId());
+			        	findByTrainingId.forEach(trainFpoId->{
+			        		traningFpoMapRepository.deleteById(trainFpoId.getTrainingFpoId());
+			        	});
+//			        	System.out.println("Before deleting->"+findByTrainingId);
+//			        	traningFpoMapRepository.deleteAll(findByTrainingId);
+//			        	System.out.println("After deleting->"+findByTrainingId);
+			        	
+			        	trainingDtls.getFpoId().forEach(fpoId->{
+			        		if (fpoId == null) {
+						        return;
+						    }
+			        		/*if(collectId.contains(fpoId)) {
+			        			TrainingFpoMap findByFpoIdFpoId = traningFpoMapRepository.findByFpoIdFpoId(fpoId);
+			        			if(Optional.ofNullable(findByFpoIdFpoId).isPresent()) {
+				        			
+			        				findByFpoIdFpoId.setLastUpdatedBy(user);
+			        				findByFpoIdFpoId.setLastUpdatedOn(new Date());
+			        				findByFpoIdFpoId.setActive(false);
+				        			traningFpoMapRepository.save(findByFpoIdFpoId);
+				        		}
+			        		}else {*/
+			        			Optional<Fpo> findById = fpoRepository.findById(fpoId);
+				        		if(findById.isPresent()) {
+				        			TrainingFpoMap trainingFpoMap = new TrainingFpoMap();
+				        			trainingFpoMap.setFpoId(findById.get());
+				        			trainingFpoMap.setTrainingId(updateTraining);
+				        			trainingFpoMap.setCreatedBy(user);
+				        			trainingFpoMap.setCreatedOn(new Date());
+				        			trainingFpoMap.setActive(true);
+				        			traningFpoMapRepository.save(trainingFpoMap);
+//				        		}
+			        		}
+			        		
+			        	});
+			        	
+			        	return existingTraining;
+			        }).orElseGet(()->{
+			        	Training newTraining = new Training();
+			        	BeanUtils.copyProperties(trainingDtls.getTrainingVO(), newTraining);
+			        	String trainingCode = "TRAINING_" + rand.ints(48, 100)
+  				        .filter(num -> (num < 58 || num > 64) && (num < 91 || num > 96))
+  				        .limit(6)
+  				        .mapToObj(c -> (char) c)
+  				        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+  				        .toString();
+			        	newTraining.setTrainingCode(trainingCode);
+			        	try {
+							newTraining.setDateOfTraining(adjustedFormat.parse(trainingDtls.getTrainingVO().getDateOfTraining().trim()));
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+			        	newTraining.setCreatedBy(user);
+			        	newTraining.setCreatedOn(new Date());
+			        	newTraining.setIsActive(true);
+			        	Training saveTrainingDtls = trainingRepository.save(newTraining);
+			        	
+			        	trainingDtls.getFpoId().forEach(fpoId->{
+			        		if (fpoId == null) {
+						        return;
+						    }
+			        		Optional<Fpo> findById = fpoRepository.findById(fpoId);
+			        		if(findById.isPresent()) {
+			        			TrainingFpoMap trainingFpoMap = new TrainingFpoMap();
+			        			trainingFpoMap.setFpoId(findById.get());
+			        			trainingFpoMap.setTrainingId(saveTrainingDtls);
+			        			trainingFpoMap.setCreatedBy(user);
+			        			trainingFpoMap.setCreatedOn(new Date());
+			        			trainingFpoMap.setActive(true);
+			        			traningFpoMapRepository.save(trainingFpoMap);
+			        		}
+			        	});
+			        	return newTraining;
+			        });
+			
+			soc.setMessage(Optional.ofNullable(trainingDtls.getTrainingVO().getTrainingId()).isPresent() ? "Training Updated" : "Training Added");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception occurred in addNUpdateTraining()-> TrainingServiceImpl "+ e.getMessage());
+			soc.setMessage("Unable to Process, PleaseTry after some time");
+			soc.setOutcome(false);
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		}
+		
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<TrainingDtls> searchTrainingInfo(String fromdateTodate, String trainingType, String status) {
+		ServiceOutcome<TrainingDtls> soc = new ServiceOutcome<TrainingDtls>();
+		TrainingDtls trainingDtls = new TrainingDtls();
+		String startDateString = null ;
+		String endDateString = null ;
+		try {
+			if(Optional.ofNullable(fromdateTodate).isPresent() && !fromdateTodate.isEmpty()) {
+				
+				String[] dateParts = fromdateTodate.split(" - ");
+				startDateString = dateParts[0];
+				endDateString = dateParts[1];
+				
+				switch (status) {
+			    case ApplicationConstants.UPCOMING:
+			    	if(Optional.ofNullable(trainingType).isPresent() && Optional.ofNullable(fromdateTodate).isPresent()) {
+			    		
+						List<Training> trainingDtlsByDateAndType = trainingRepository.getTrainingDtlsByDateAndType(startDateString, endDateString, trainingType, status);
+			    		trainingDtls.setTrainingList(trainingDtlsByDateAndType);
+					}else {
+						List<Training> findAllByStatusAndIsActive = trainingRepository.findAllByStatusAndIsActive(status, true);
+						trainingDtls.setTrainingList(findAllByStatusAndIsActive);
+					}
+			        break;
+			    case ApplicationConstants.COMPLETED:
+			    	if(Optional.ofNullable(trainingType).isPresent() && Optional.ofNullable(fromdateTodate).isPresent()) {
+			    		
+			    		List<Training> trainingDtlsByDateAndType = trainingRepository.getTrainingDtlsByDateAndType(startDateString, endDateString, trainingType, status);
+			    		trainingDtls.setTrainingList(trainingDtlsByDateAndType);
+			    	}else {
+			    		List<Training> findAllByStatusAndIsActive = trainingRepository.findAllByStatusAndIsActive(status, true);
+						trainingDtls.setTrainingList(findAllByStatusAndIsActive);
+			    	}
+			        break;
+			    
+			    default:
+			    	List<Training> findAllByStatusAndIsActive = trainingRepository.findAllByStatusAndIsActive(ApplicationConstants.UPCOMING, true);
+					trainingDtls.setTrainingList(findAllByStatusAndIsActive);
+			}
+				
+			}else {
+				List<Training> findAllByStatusAndIsActive = trainingRepository.findAllByStatusAndIsActive(status.equalsIgnoreCase(ApplicationConstants.UPCOMING) ? ApplicationConstants.UPCOMING : ApplicationConstants.COMPLETED, true);
+				trainingDtls.setTrainingList(findAllByStatusAndIsActive);
+			}
+				
+			soc.setData(trainingDtls);
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception occurred in searchTrainingInfo()-> TrainingServiceImpl "+ e.getMessage());
+			soc.setMessage("error");
+			soc.setOutcome(false);
+		}
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<TrainingDtls> getTrainingByTrainingCode(String trainingCode) {
+		ServiceOutcome<TrainingDtls> soc = new ServiceOutcome<TrainingDtls>();
+		TrainingDtls trainingDtls = new TrainingDtls();
+		TrainingVO trainingVO = new TrainingVO();
+		List<TrainingFpoMapVO> trainingFpoMapVOList = new ArrayList<>();
+		TrainingFpoMapVO trainingFpoMapVO = new TrainingFpoMapVO();
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		try {
+			Training findByTrainingCode = trainingRepository.findByTrainingCode(trainingCode);
+			BeanUtils.copyProperties(findByTrainingCode, trainingVO);
+			Date dateOfTraining = dateTimeFormat.parse(findByTrainingCode.getDateOfTraining().toString());
+			trainingVO.setDateOfTraining(dateFormat.format(dateOfTraining));
+			trainingDtls.setTrainingVO(trainingVO);
+			
+			List<TrainingFpoMap> findByTrainingId = traningFpoMapRepository.findByTrainingIdTrainingId(findByTrainingCode.getTrainingId());
+			findByTrainingId.forEach(fpoTraining->{
+				BeanUtils.copyProperties(fpoTraining, trainingFpoMapVO);
+				trainingFpoMapVOList.add(trainingFpoMapVO);
+			});
+			trainingDtls.setTrainingFpoMapVOList(trainingFpoMapVOList);
+			
+            soc.setData(trainingDtls);
+            soc.setMessage("success");
+			soc.setOutcome(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception occurred in getTrainingByTrainingCode()-> TrainingServiceImpl "+ e.getMessage());
+			soc.setMessage("error");
+			soc.setOutcome(false);
+		}
+		return soc;
+	}
+	
+	
+
+}

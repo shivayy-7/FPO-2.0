@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="SynchronizeViewSettings">
+		<item key="linkWithEditor" value="false"/>
+		<item key="lastactiveparticipant_id" value="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant"/>
+		<item key="lastactiveparticipant_sec_id" value="1697046776343"/>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696518741534">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="1"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696536000376">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696536303263">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696536395436">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696602740347">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="1"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696603842543">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696628088096">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696690003972">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="1"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696707602806">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1696758669426">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1697038761682">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="1"/>
+		</section>
+		<section name="org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant.1697046776343">
+			<item key="org.eclipse.team.ui.activeModelProvider" value="org.eclipse.team.ui.activeModelProvider"/>
+			<item key="org.eclipse.team.ui.P_SYNCVIEWPAGE_MODE" value="2"/>
+		</section>
+	</section>
+</section>

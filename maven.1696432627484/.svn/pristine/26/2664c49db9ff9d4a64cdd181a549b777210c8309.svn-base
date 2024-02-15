@@ -1,0 +1,31 @@
+package com.fpo.web.utils;
+
+public class ApplicationConstants {
+	private ApplicationConstants() {
+	}
+	public static final String DRAFT = "DRAFT";
+	public static final String PENDING = "PENDING";
+	public static final String APPROVED = "APPROVED";
+	public static final String REVERTED = "REVERTED";
+	
+	// ROLE
+	public static final String ROLE_TRAINER = "ROLE_TRAINER";
+	public static final String ROLE_CBBO = "ROLE_CBBO";
+	public static final String ROLE_FPO = "ROLE_FPO";
+
+	public static final String APPL_MODULE_INSTALLMENT = "INSTALLMENT";
+	public static final String MODULE_FORM_INSTALLMENT = "INSTALLMENT";
+
+	public static final String INSTALLMENT_ROUT_TYPE = "FPO-IN-CBBO-DMC-CBBO-APP";
+	
+	//DOCUMENT NAME
+	public static final String INCORPORATION = "INCORPORATION CERTIFICATE";
+	public static final String PAN = "PAN";
+	public static final String UDYOG_MSME = "UDYOG/MSME CERTIFICATE";
+	public static final String OTHERS = "OTHERS";
+	
+	
+
+	
+	   
+}

@@ -1,0 +1,324 @@
+package com.fpo.web.services;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.aashdit.umt.model.Role;
+import com.aashdit.umt.model.RoleLevelMap;
+import com.aashdit.umt.model.User;
+import com.aashdit.umt.repository.RoleLevelMapRepository;
+import com.aashdit.umt.repository.UserRepository;
+import com.aashdit.umt.service.AccessService;
+import com.aashdit.umt.service.RoleService;
+import com.aashdit.umt.service.UserService;
+import com.aashdit.umt.util.SecurityHelper;
+import com.fpo.web.entities.FarmerCbbo;
+import com.fpo.web.entities.FarmerCbboMngmt;
+import com.fpo.web.entities.Fpo;
+import com.fpo.web.entities.Training;
+import com.fpo.web.entities.TrainingFpoMap;
+import com.fpo.web.repositories.DesignationRepository;
+import com.fpo.web.repositories.FarmerCbboMngmtRepository;
+import com.fpo.web.repositories.FarmerCbboRepository;
+import com.fpo.web.repositories.FpoRepository;
+import com.fpo.web.repositories.GenderRepository;
+import com.fpo.web.repositories.TrainingFpoMapRepository;
+import com.fpo.web.repositories.TrainingRepository;
+import com.fpo.web.utils.ApplicationConstants;
+import com.fpo.web.vos.CbboVO;
+import com.fpo.web.vos.FarmerCbboMngmtVO;
+import com.fpo.web.vos.FpoDtls;
+import com.fpo.web.vos.TrainingFpoMapVO;
+import com.fpo.web.vos.TrainingVO;
+import com.ibm.icu.text.SimpleDateFormat;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class TrainingServiceImpl implements TrainingService {
+	
+	@Autowired private ModelMapper modelMapper;
+	
+    @Autowired private TrainingRepository trainingRepository;
+	
+	@Autowired private FarmerCbboMngmtRepository farmerCbboMngmtRepository;
+	
+	@Autowired private FarmerCbboRepository farmerCbboRepository;
+	
+	@Autowired
+    private RoleService roleService;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private RoleLevelMapRepository roleLevelMapRepository;
+    
+    @Autowired
+    private AccessService accessService;
+    
+    @Autowired
+    private GenderRepository genderRepository;
+    
+    @Autowired
+    private DesignationRepository designationRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private TrainingFpoMapRepository traningFpoMapRepository;
+    
+    @Autowired
+    private FpoRepository fpoRepository;
+	
+	@Override
+	public ServiceOutcome<Boolean> manageTraining(FpoDtls fpoDtls) {
+		
+		ServiceOutcome<Boolean> soc = new ServiceOutcome<Boolean>();
+		Random rand = new Random();
+		User user = SecurityHelper.getCurrentUser();
+		try {
+			
+			Training training = Optional.ofNullable(fpoDtls.getTrainingVO().getTrainingId()).flatMap(trainingRepository::findById).orElseGet(Training::new);
+			
+			modelMapper.map(fpoDtls.getTrainingVO(), training);
+			System.out.println(training);
+			
+			if(!Optional.ofNullable(fpoDtls.getTrainingVO().getTrainingId()).isPresent()) {
+				String trainingCode = "TRAINING-" + rand.ints(48, 100)
+		        .filter(num -> (num < 58 || num > 64) && (num < 91 || num > 96))
+		        .limit(6)
+		        .mapToObj(c -> (char) c)
+		        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+		        .toString();
+				training.setTrainingCode(trainingCode);
+				training.setCreatedBy(user);
+		        training.setCreatedOn(new Date());
+			}else {
+				training.setTrainingCode(fpoDtls.getTrainingVO().getTrainingCode());
+				training.setLastUpdatedBy(user);
+		        training.setLastUpdatedOn(new Date());
+			}
+			training.setTrainer(farmerCbboMngmtRepository.findById(fpoDtls.getTrainingVO().getTrainer().getId()).orElse(null));
+//			String fpoId = Arrays.stream(fpoDtls.getTrainingVO().getFpoId()).map(String::valueOf).collect(Collectors.joining("||"));
+//			training.setFpoId(fpoId);
+			training.setIsActive(true);
+			training.setStatus(fpoDtls.getTrainingVO().getStatus());
+			Training saveTraining = trainingRepository.save(training);
+			
+			if(!Optional.ofNullable(fpoDtls.getTrainingVO().getTrainingId()).isPresent()) {
+				fpoDtls.getTrainingVO().getFpoId().forEach(fpoId->{
+					Optional<Fpo> findById = fpoRepository.findById(fpoId);
+					if(findById.isPresent()) {
+						TrainingFpoMap trainingFpoMap = new TrainingFpoMap();	
+						trainingFpoMap.setFpoId(findById.get());
+						trainingFpoMap.setTrainingId(saveTraining);
+						trainingFpoMap.setActive(true);
+						trainingFpoMap.setCreatedBy(user);
+						trainingFpoMap.setCreatedOn(new Date());
+						traningFpoMapRepository.save(trainingFpoMap);
+					}
+				});
+			}else {
+				List<TrainingFpoMap> findByTrainingIdTrainingId = traningFpoMapRepository.findByTrainingIdTrainingId(fpoDtls.getTrainingVO().getTrainingId());
+				findByTrainingIdTrainingId.forEach(trainingId->{
+					Optional<Fpo> findById = fpoRepository.findById(trainingId.getFpoId().getFpoId());
+					if(findById.isPresent()) {
+						trainingId.setFpoId(findById.get());
+						trainingId.setActive(true);
+						trainingId.setLastUpdatedBy(user);
+						trainingId.setLastUpdatedOn(new Date());
+						traningFpoMapRepository.save(trainingId);
+					}
+				});
+			}
+			System.out.println(training);
+			
+			soc.setOutcome(true);
+			soc.setMessage(Optional.ofNullable(fpoDtls.getTrainingVO().getTrainingId()).isPresent() ? "Training Sceduled" : "Training Scheduled Updated");
+		} catch (Exception e) {
+			log.error("Exception occurred in manageTraining() -> TrainingServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("Unable to Process");
+		}
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<FpoDtls> getSceduledTrainingByCode(String searchCode) {
+		ServiceOutcome<FpoDtls> soc = new ServiceOutcome<FpoDtls>();
+		FpoDtls fpoDtls = new FpoDtls();
+		TrainingVO trainingVo = new TrainingVO();
+		List<Long> fpoId = new ArrayList<>();
+		List<TrainingFpoMapVO> trainingFpoMapVo = new ArrayList<>();
+		try {
+			Optional<Training> findByTrainingCode = trainingRepository.findByTrainingCode(searchCode);
+			if(findByTrainingCode.isPresent()) {
+				modelMapper.map(findByTrainingCode.get(), trainingVo);
+				
+				List<TrainingFpoMap> findByTrainingIdTrainingId = traningFpoMapRepository.findByTrainingIdTrainingId(findByTrainingCode.get().getTrainingId());
+				findByTrainingIdTrainingId.forEach(trainingId->{
+					Long fpoId2 = trainingId.getFpoId().getFpoId();
+					fpoId.add(fpoId2);
+					TrainingFpoMapVO trainingFpoMap = new TrainingFpoMapVO();
+					modelMapper.map(trainingId, trainingFpoMap);
+					trainingFpoMapVo.add(trainingFpoMap);
+				});
+				fpoDtls.setTrainingFpoMapVo(trainingFpoMapVo);
+//				Long[] fpoId = Arrays.stream(findByTrainingCode.get().getFpoId().split("\\|\\|"))
+//									  .map(Long::valueOf)
+//									  .toArray(Long[]::new);
+				
+				SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+		        Date date = dateTimeFormat.parse(findByTrainingCode.get().getDateOfEvent().toString());
+
+		        // Extract only the year, month, and day
+		        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		        String formattedDate = dateFormat.format(date);
+		        trainingVo.setDateOfEvent(formattedDate);
+				trainingVo.setFpoId(fpoId);
+				System.out.println(trainingVo);
+				fpoDtls.setTrainingVO(trainingVo);
+			}
+			
+			soc.setData(fpoDtls);
+		} catch (Exception e) {
+			log.error("Exception occurred in getSceduledTrainingByCode() -> TrainingServiceImpl"+ e.getMessage());
+			soc.setOutcome(false);
+			soc.setMessage("Unable to Process");
+		}
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<List<FarmerCbboMngmtVO>> getCbboMngmntDtls(Long userId) {
+	    ServiceOutcome<List<FarmerCbboMngmtVO>> soc = new ServiceOutcome<>();
+	    List<FarmerCbboMngmtVO> cbboMngmntList = new ArrayList<>();
+	    
+	    try {
+	        FarmerCbbo farmerCbbo = farmerCbboRepository.findByUserIdUserIdAndIsActive(userId, true);
+	        List<FarmerCbboMngmt> farmerCbboMngmntListByUserId = farmerCbboMngmtRepository.findByCbboIdAndIsActive(farmerCbbo.getId(), true);
+	        
+	        farmerCbboMngmntListByUserId.forEach(cbboMngmnt -> {
+	            FarmerCbboMngmtVO farmerCbboMngmntVo = new FarmerCbboMngmtVO(); // Create a new instance here
+	            modelMapper.map(cbboMngmnt, farmerCbboMngmntVo);
+	            cbboMngmntList.add(farmerCbboMngmntVo);
+	        });
+	        
+	        soc.setData(cbboMngmntList);
+	    } catch (Exception e) {
+	        log.error("Exception occurred in getCbboMngmntDtls() -> TrainingServiceImpl" + e.getMessage());
+	        soc.setOutcome(false);
+	        soc.setMessage("Unable to Process");
+	    }
+	    
+	    return soc;
+	}
+
+	@Override
+	public ServiceOutcome<Boolean> manageCbboMngmntDtls(CbboVO cbboVo) {
+		ServiceOutcome<Boolean> soc = new ServiceOutcome<Boolean>();
+		Long[] isPrimary=new Long[] {1l};
+		User currentUser = SecurityHelper.getCurrentUser();
+		try {
+			
+			cbboVo.getFarmerCbboMngmtVO().forEach(mngmntDtls->{
+											 
+				FarmerCbboMngmt farmerCbboMngmt = farmerCbboMngmtRepository.findById(mngmntDtls.getId()).get();
+
+				FarmerCbboMngmt farmerCbboMngmntNew = new FarmerCbboMngmt();
+				modelMapper.map(mngmntDtls, farmerCbboMngmntNew);
+				System.out.println(farmerCbboMngmntNew);
+				farmerCbboMngmntNew.setCbbo(farmerCbboRepository.findById(farmerCbboMngmt.getCbbo().getId()).get());
+				farmerCbboMngmntNew.setGender(genderRepository.findByGenderId(mngmntDtls.getGender().getGenderId()));
+				farmerCbboMngmntNew.setDesignation(designationRepository.findByDesignationId(mngmntDtls.getDesignation().getDesignationId()));
+				
+//				if(mngmntDtls.getIsTrainer() && farmerCbboMngmt.getIsTrainer()) {
+//					farmerCbboMngmntNew.setIsTrainer(true);
+//					farmerCbboMngmntNew.setIsUserCreation(true);
+//					User user = userRepository.findById(farmerCbboMngmt.getUserId().getUserId()).get();
+//					farmerCbboMngmntNew.setUserId(user);
+//				}else if(!mngmntDtls.getIsTrainer() && !farmerCbboMngmt.getIsTrainer()) {
+//					farmerCbboMngmntNew.setIsTrainer(farmerCbboMngmt.getIsTrainer());
+//					farmerCbboMngmntNew.setIsUserCreation(farmerCbboMngmt.getIsUserCreation());
+//
+//				}else if(mngmntDtls.getIsTrainer() && !farmerCbboMngmt.getIsTrainer() || !mngmntDtls.getIsTrainer() && farmerCbboMngmt.getIsTrainer()) {
+//					    if(mngmntDtls.getIsTrainer()) {
+//					    	
+//					    	User findByUserName = userRepository.findByUserName(mngmntDtls.getCbboMngmtName());
+//					    	if(findByUserName.getUserName().equalsIgnoreCase(mngmntDtls.getCbboMngmtName())) {
+//					    		farmerCbboMngmntNew.setUserId(findByUserName);
+//					    	}else {
+//					    		ServiceOutcome<Role> role = roleService.getRoleByCode(ApplicationConstants.ROLE_TRAINER);
+//					    		Long[] roleId=new Long[] {role.getData().getRoleId()};
+//					    		ServiceOutcome<User> newUser = userService.addUser(mngmntDtls.getCbboMngmtName(),mngmntDtls.getCbboMngmtName(),"",new Date(),"NA" ,"NA",roleId,isPrimary,role.getData().getRoleCode());
+//					    		List<RoleLevelMap> rolelevelMapList=roleLevelMapRepository.findByRoleId(roleId[0]);
+//					    		ServiceOutcome<String> svcOutcome = accessService.saveConfig(newUser.getData().getUserId(), roleId[0], rolelevelMapList.get(0).getLevelId(), 5L);
+//					    		farmerCbboMngmntNew.setUserId(newUser.getData());
+//					    	}
+//					    	
+//							farmerCbboMngmntNew.setIsTrainer(true);
+//							farmerCbboMngmntNew.setIsUserCreation(true);
+//					    	
+//					    }else if(!mngmntDtls.getIsTrainer()) {
+//					    	farmerCbboMngmntNew.setUserId(userRepository.findById(farmerCbboMngmt.getUserId().getUserId()).get());
+//					    	User user = userRepository.findById(farmerCbboMngmt.getUserId().getUserId()).get();
+//							user.setIsActive(false);
+//							user.setIsLocked(true);
+//							userRepository.save(user);
+//							System.out.println(user);
+//					    }
+//					}
+
+				farmerCbboMngmntNew.setCreatedOn(farmerCbboMngmt.getCreatedOn());
+				farmerCbboMngmntNew.setCreatedBy(farmerCbboMngmt.getCreatedBy());
+				farmerCbboMngmntNew.setLastUpdatedBy(currentUser);
+				farmerCbboMngmntNew.setLastUpdatedOn(new Date());
+				farmerCbboMngmntNew.setIsActive(true);
+				farmerCbboMngmtRepository.save(farmerCbboMngmntNew);
+				System.out.println(farmerCbboMngmntNew);
+		 });
+			soc.setOutcome(true);
+			soc.setMessage("Details Updated Succesfull");
+		} catch (Exception e) {
+			log.error("Exception occurred in manageCbboMngmntDtls() -> TrainingServiceImpl" + e.getMessage());
+	        soc.setOutcome(false);
+	        soc.setMessage("Unable to Process");
+		}
+		
+		return soc;
+	}
+
+	@Override
+	public ServiceOutcome<FpoDtls> sceduledTrainingByTabCode(String tabCode) {
+		ServiceOutcome<FpoDtls> soc = new ServiceOutcome<FpoDtls>();
+		FpoDtls fpoDtls = new FpoDtls();
+		try {
+			List<Training> findByStatus = trainingRepository.findByStatus(tabCode);
+			fpoDtls.setTrainingList(findByStatus);
+			soc.setData(fpoDtls);
+		} catch (Exception e) {
+			log.error("Exception occurred in manageCbboMngmntDtls() -> TrainingServiceImpl" + e.getMessage());
+	        soc.setOutcome(false);
+	        soc.setMessage("Unable to Process");
+		}
+		return soc;
+	}
+
+	
+
+}

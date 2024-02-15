@@ -1,0 +1,13 @@
+package com.fpo.web.repositories;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fpo.web.entities.FarmerSubActMap;
+
+public interface FarmerSubActMapRepository extends JpaRepository<FarmerSubActMap, Long> {
+
+	Optional<FarmerSubActMap> findByFarmerFarmerId(Long farmerId);
+
+}

@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### LOGIN LAYOUT ################################################ -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="layout.login"
+		template="/WEB-INF/commonSnippets/layoutWithLoginPage/login.jsp"></definition>
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### BASE LAYOUT ################################################ -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="layout.base"
+		template="/WEB-INF/commonSnippets/layoutWithLoginPage/baselayout.jsp">
+		<put-attribute name="header"
+			value="/WEB-INF/commonSnippets/layoutWithLoginPage/header.jsp" />
+		<put-attribute name="menu"
+			value="/WEB-INF/commonSnippets/layoutWithLoginPage/menu.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer"
+			value="/WEB-INF/commonSnippets/layoutWithLoginPage/footer.jsp" />
+	</definition>
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### BLANK LAYOUT ############################################# -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="layout.blank"
+		template="/WEB-INF/commonSnippets/layoutWithLoginPage/blankLayout.jsp">
+		<put-attribute name="title" value="" />
+		<put-attribute name="body" value="" />
+	</definition>
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### DEFAULT OUERE LAYOUT ############################################# -->
+	<!-- ################################################################################################################ -->
+
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### ERROR LAYOUT ############################################# -->
+	<!-- ################################################################################################################ -->
+
+
+
+	<!-- ################################################################################################################ -->
+	<!-- ####################################### ERROR PAGE ################################################ -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="site.accessdenied" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/403.jsp" />
+	</definition>
+
+	<definition name="site.404" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/404.jsp" />
+	</definition>
+
+	<definition name="site.405" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/405.jsp" />
+	</definition>
+
+	<definition name="site.500" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/500.jsp" />
+	</definition>
+
+	<definition name="site.503" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/503.jsp" />
+	</definition>
+
+	<definition name="site.401" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/401.jsp" />
+	</definition>
+
+	<definition name="site.accessdenied" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/403.jsp" />
+	</definition>
+
+	<definition name="site.mainDashboard" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/article275/mainDashboard.jsp" />
+	</definition>
+	<definition name="site.400" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/400.jsp" />
+	</definition>
+
+	<definition name="site.unknownError" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/catchAll.jsp" />
+	</definition>
+
+	<definition name="site.accessDenied" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/commonSnippets/errorPages/accessDenied.jsp" />
+	</definition>
+
+
+	<!-- ################################################################################################################ -->
+	<!-- ##################################### ADMINSTRATION ############################################## -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="site.admin.user.acl.configure"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/configureACL.jsp"></put-attribute>
+	</definition>
+
+	<definition name="site.admin.acl.list" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/listACL.jsp"></put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.module"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/listModules.jsp"></put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.module.add"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/addModule.jsp"></put-attribute>
+	</definition>
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### USER MANAGEMENT START ############################################# -->
+	<!-- ################################################################################################################ -->
+
+	<definition name="site.umt.userProfile"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/userProfile.jsp"></put-attribute>
+	</definition>
+
+	<definition name="site.umt.changePassword"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/changePassword.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.umt.userList" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/userList.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.umt.addUser" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/addUser.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.umt.userEdit" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/userEdit.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.umt.userView" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/umt/userView.jsp">
+		</put-attribute>
+	</definition>
+
+	<!-- Core -->
+	<definition name="site.admin.roleList" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/roleList.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.admin.roleEdit" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/roleEdit.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.admin.roleView" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/roleView.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.admin.roleLevelMapList"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/roleLevelMapList.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.module.edit"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/editModule.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.menu" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/listMenu.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.menu.edit"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/editMenu.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="sysAdmin.setup.menu.add"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/addMenu.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="admin.menu.role.map" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/roleMenuMap.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="admin.menu.reorder" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/reorderMenu.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="system.privilege.list"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/listPermission.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.physicalReport" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/report/physicalReport.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="system.privilege.edit"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/editPermission.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="system.privilege.add"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/system/addPermission.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="app.home" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/home.jsp">
+		</put-attribute>
+	</definition>
+
+
+	<definition name="admin.permission.map"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/admin/menuPermissionMap.jsp">
+		</put-attribute>
+	</definition>
+	
+	
+	<definition name="site.dashboard"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/welcome.jsp">
+		</put-attribute>
+	</definition>
+
+
+	<!-- ################################################################################################################ -->
+	<!-- #################################### USER MANAGEMENT END ############################################# -->
+	<!-- ################################################################################################################ -->
+
+    <!-- #################################### FPO START ############################################# -->
+    
+    <definition name="site.addFpo" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/fpo/addFpo.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.fpoList" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/fpo/fpoList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.fpoTraining" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/fpo/fpoTraining.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.fpo.installment" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/fpo/installment.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.fpo.milestoneCollectorList" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/fpo/milestoneCollectorList.jsp">
+		</put-attribute>
+	</definition>
+
+    
+    <!-- #################################### FPO END ############################################### -->
+    
+    <!-- #################################### TRAINING END ############################################### -->
+    
+    <definition name="site.training" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/training/training.jsp">
+		</put-attribute>
+	</definition>
+
+	<!-- #################################### TRAINING START ############################################# -->
+
+	<!-- #################################### CBBO START ############################################# -->
+
+	<definition name="site.addCBBO" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/cbbo/manageCbbo.jsp">
+		</put-attribute>
+	</definition>
+
+	<definition name="site.cbboList" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/cbbo/cbboList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.cbboUser" extends="layout.base">
+		<put-attribute name="body" value="/WEB-INF/views/cbbo/cbboUser.jsp">
+		</put-attribute>
+	</definition>
+
+	<!-- #################################### CBBO END ############################################### -->
+	
+	<!-- #################################### MASTER PAGE START ############################################# -->
+
+	<definition name="site.articleMaster" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/masterMap.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.districtList" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/districtList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.addDistrict" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/addDistrict.jsp"></put-attribute>
+	</definition>
+	
+	<definition name="site.core.blockList" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/blockList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.addMuncipality"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/addMuncipality.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.municipalityList"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/muncipalityList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.addGrampanchayat"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/addGrampanchayat.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.grampanchayatList"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/grampanchayatList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.villageList"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/villageList.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.addVillage"
+		extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/addVillage.jsp">
+		</put-attribute>
+	</definition>
+	
+	<definition name="site.core.addBlock" extends="layout.base">
+		<put-attribute name="body"
+			value="/WEB-INF/views/masters/addBlock.jsp">
+		</put-attribute>
+	</definition>
+
+	<!-- #################################### MASTER PAGE END ############################################### -->
+
+</tiles-definitions>

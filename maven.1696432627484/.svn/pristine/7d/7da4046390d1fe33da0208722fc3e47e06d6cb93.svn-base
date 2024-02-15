@@ -1,0 +1,119 @@
+
+msg.success=The Request Was Completed Successfully
+msg.error=The Request Could Not Be Completed
+msg.active=Data Has Activated Successfully
+msg.inactive=Data has deactivated successfully
+
+
+
+site.administration=Administration
+site.admin.acl.configure=Configure Access
+site.admin.acl.username=User Name
+
+site.admin.acl.role=Role
+site.admin.acl.level=Access Level
+site.admin.module.configure=Configure Modules
+site.admin.mst.manage.role=Manage Role
+site.admin.mst.add.role=Add Role
+site.admin.mst.role.list=Role List
+site.admin.mst.role.name=Role Name
+site.admin.mst.role.code=Role Code
+site.admin.mst.role.display.name=Display Name
+site.admin.mst.role.description=Description
+site.admin.mst.role.edit=Edit Role
+site.admin.mst.role.view= View Role
+site.admin.mst.role.details=Role Details
+site.admin.mst.role.maxassignments=Maximum Assignments
+
+site.admin.user.name=User Name
+site.admin.user.first.name=First Name
+site.admin.user.last.name=Last Name
+site.admin.management.user=User Management
+site.admin.manage.user=Manage User
+site.admin.user.list=User List
+site.admin.user.id=User Id
+
+site.admin.user.password=Password
+site.admin.user.confirm.password=Confirm Password
+
+site.admin.password.dicliration1=Password Must Be Between 8 - 15 Characters 
+site.admin.password.dicliration2=Must Have One Lower Case Alphabet.
+site.admin.password.dicliration3=Must Have One Upper Case Alphabet.
+site.admin.password.dicliration4=Must Have One Number.
+site.admin.password.dicliration5=Must Have One Special Sign (@/*/#)
+
+#system user
+site.system.menu=Menu
+site.system.menu.list=List Menus
+site.system.menu.add=Add Sub Menu
+
+site.system.module=Module
+site.system.module.add=Add Module
+
+site.system.privilege=Privilege
+site.system.privilege.add=Add Privilege
+site.system.privilege.configure=Configure Privileges
+
+site.system.system.configure=System Configure
+
+
+
+#Vishnoo - BEG my entries
+
+login.account.locked=Account is Locked
+login.account.loggedin=You are already logged in
+login.account.badcaptcha=Captcha code does not match
+login.account.badcredentials=Bad Credentials
+
+
+max.allocations.exceeded=Maximum Number Of Allocations For The Level Have Exceeded The Defined Value For The Role.
+
+#common spring message
+site.common.action=Action
+site.common.back=Back
+site.common.submit=Submit
+site.common.save=Save
+site.common.update=Update
+site.common.mobile.number=Mobile No
+site.common.email=Email Id
+site.common.filter=Filter
+site.common.dob=Date Of Birth
+site.common.proceed=Proceed
+site.common.track=Track
+site.common.select.required=Please Select An Item In The List
+site.common.input.required=This Field Cannot Be Left Blank
+
+site.common.msg.block= Block Not Found
+site.common.msg.grampanchayat= Grampanchayat Not Found
+site.common.msg.village= Village Not Found
+site.common.msg.district=District Not Found
+site.common.msg.municipality=Municipality Not Found
+
+site.common.name = Name
+site.common.age = Age
+site.common.gender = Gender
+site.common.mobile = Mobile
+site.common.email = Email Id
+site.common.state = State
+site.common.district = District
+site.common.ulbtype = Ulb Type
+site.common.municipality = Municipality
+site.common.block = Block
+site.common.gp = Gram Panchayat
+site.common.village = Village
+site.common.pincode = Pin Code
+site.common.fax=Fax No
+site.common.address.type=Address Type
+site.common.passwordchange=Password Has Been Changed And Reset Credential Sent Successfully To Registered Mail
+
+msg.success.inActAct = Activity InActivated Successfully
+msg.success.inActActSeas = Activity Season InActivated Successfully
+
+msg.success.actDist = District activated successfully
+msg.success.inActDist = District InActivated successfully
+msg.success.actBlk = Block activated successfully
+msg.success.inActBlk = Block InActivated successfully
+msg.success.actGp = Grampanchayat activated successfully
+msg.success.inActGp = Grampanchayat InActivated successfully
+msg.success.actVlg = Village activated successfully
+msg.success.inActVlg = Village InActivated successfully

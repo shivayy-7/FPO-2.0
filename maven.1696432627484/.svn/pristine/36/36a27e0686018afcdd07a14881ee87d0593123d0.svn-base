@@ -1,0 +1,99 @@
+package com.fpo.web.services;
+
+import java.util.List;
+import java.util.Map;
+
+import com.aashdit.framework.core.ServiceOutcome;
+import com.fpo.web.entities.Activity;
+import com.fpo.web.entities.BankBranch;
+import com.fpo.web.entities.Block;
+import com.fpo.web.entities.Component;
+import com.fpo.web.entities.District;
+import com.fpo.web.entities.Grampanchayat;
+import com.fpo.web.entities.Municipality;
+import com.fpo.web.entities.State;
+import com.fpo.web.entities.SubActivity;
+import com.fpo.web.entities.Village;
+import com.fpo.web.entities.Ward;
+import com.fpo.web.vos.DuplicateCheckDto;
+
+public interface CommonService {
+	
+	public ServiceOutcome<List<?>> getAllData(String identity);
+
+	public ServiceOutcome<List<?>> getAllAjaxCallDetails(String identity, String id);
+
+	public ServiceOutcome<List<District>> findByAllDistrict();
+
+	public ServiceOutcome<District> addNupdateDistrict(District district);
+
+	public ServiceOutcome<District> getDistrictByDistrictId(Long districtId);
+
+	public ServiceOutcome<List<State>> findAllState(boolean b);
+
+	public ServiceOutcome<DuplicateCheckDto> checkDuplicateByAnyCode(String trim, Long districtId, String type);
+
+	public ServiceOutcome<DuplicateCheckDto> checkDuplicateByAnyName(String trim, Long districtId, String type);
+
+	public ServiceOutcome<List<Block>> getAllBlock();
+
+	public ServiceOutcome<Boolean> addBlock(Block block);
+
+	public ServiceOutcome<Block> editBlock(Long blockId);
+
+	public ServiceOutcome<List<Municipality>> getAllMunicipality();
+
+	ServiceOutcome<Municipality> addNupdateMunicipality(Municipality municipality);
+
+	ServiceOutcome<Municipality> getMuncipalityByMuncipalityId(Long muncipalityId);
+
+	public ServiceOutcome<List<Grampanchayat>> getAllGrampanchayats();
+
+	public ServiceOutcome<Grampanchayat> addNupdateGrampanchayat(Grampanchayat grampanchayat);
+
+	ServiceOutcome<Grampanchayat> getGrampanchayatByGpId(Long gpId);
+
+	ServiceOutcome<List<District>> getDistricts(Boolean isActive);
+
+	List<Village> findAllVillage();
+
+	ServiceOutcome<Village> addNupdateVillage(Village village);
+
+	ServiceOutcome<Village> getVillageByVillageId(Long villageId);
+
+	ServiceOutcome<List<District>> getAllActiveDistrictByStateId(Long stateId, Boolean byPassCheck);
+
+	ServiceOutcome<List<Block>> getAllActiveBlockByDistrictId(Long districtId, Boolean byPassCheck);
+
+	ServiceOutcome<List<Grampanchayat>> getAllActiveGpByBlockId(Long blockId, Boolean byPassCheck);
+
+	ServiceOutcome<List<Village>> getAllActiveVillageByGpId(Long gpId, Boolean byPassCheck);
+
+	ServiceOutcome<List<Municipality>> getMunicipalityByDistrictId(Long districtId, Boolean byPassCheck);
+
+	ServiceOutcome<List<Ward>> getWardListByUlb(Long ulbId, Boolean byPassCheck);
+
+	ServiceOutcome<List<BankBranch>> findIfscByBankNameBranchName(String bankName, String branchName);
+
+	ServiceOutcome<List<BankBranch>> findByBankName(String bankName);
+
+	ServiceOutcome<List<String>> getBankList();
+
+	String getDocument(String downloadCode, Long docId);
+
+	ServiceOutcome<String> inActNActDemgry(String demoCall, Long id, Boolean status);
+
+	List<Village> findAllFilterVillageList(Long districtId, Long blockId, Long gpId, Long villageId);
+
+	List<Activity> getActivityList(String cmpCode);
+
+	List<SubActivity> getSubActivityList(String actCode);
+
+	<T> ServiceOutcome<T> getDataByAdministrativeid(Long adminstrativeId, String string);
+
+	ServiceOutcome<List<?>> getAdminstartiveNameByAdminstrativeId(List<Long> allAdminstrativeId, Long adminstrativeId,
+			String demographyName);
+
+	ServiceOutcome<District> getDistrictByAdminstrativeId(Long adminstrativeId);
+
+}

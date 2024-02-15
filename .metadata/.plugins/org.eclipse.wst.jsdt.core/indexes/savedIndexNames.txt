@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+D:\fpo2.0\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+2834561374.index
+159036101.index
+679404490.index
+2738215626.index
+660421570.index
+399823651.index

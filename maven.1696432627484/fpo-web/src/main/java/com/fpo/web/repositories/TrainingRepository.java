@@ -1,0 +1,43 @@
+package com.fpo.web.repositories;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.fpo.web.entities.Training;
+import com.fpo.web.entities.TrainingFpoMap;
+
+public interface TrainingRepository extends JpaRepository<Training, Long> {
+
+	List<Training> findAllByIsActive(boolean b);
+
+	List<Training> findAllByStatusAndIsActive(String upcoming, boolean b);
+
+//	@Query(value = "SELECT * FROM t_frm_training_info tfti " +
+//	        "WHERE tfti.training_type = :trainingType " +
+//	        "AND tfti.date_of_training BETWEEN :startDate AND :endDate AND tfti.status=:status", nativeQuery = true)
+//	List<Training> getTrainingDtlsByDateAndType(
+//	        @Param("startDate") String startDate,
+//	        @Param("endDate") String endDate,
+//	        @Param("trainingType") Optional<String> trainingType,
+//	        @Param("status") String status
+//	);
+
+	@Query(value = "SELECT * FROM t_frm_training_info tfti " +
+	        "WHERE tfti.training_type = :trainingType " +
+	        "AND tfti.date_of_training BETWEEN date(:startDate) AND date(:endDate) AND tfti.status=:status", nativeQuery = true)
+	List<Training> getTrainingDtlsByDateAndType(@Param("startDate") String startDate,
+	        @Param("endDate") String endDate,
+	        @Param("trainingType") String trainingType,
+	        @Param("status") String status);
+
+	Training findByTrainingCode(String trainingCode);
+
+
+
+//	Optional<Training> findByTrainingCodeAndStatus(String searchCode, String tabCode);
+
+}
